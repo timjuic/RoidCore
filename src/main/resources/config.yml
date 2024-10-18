@@ -1,0 +1,5 @@
+help-message-header: "&8&m--------------&8[ &a&lRoid&2&lDungeons &8]&m--------------"
+help-category-header: "&8&m--------------&8[ &a&l{CATEGORY} &2&lHelp &8]&m--------------"
+no-permission-message: "&cYou don't have permission to use this!"
+only-players-command: "&cOnly players can use this command!"
+invalid-command-message: "&cThat command doesn't exist! Type /dungeons for help."

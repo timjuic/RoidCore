@@ -26,8 +26,8 @@ public class CommandManager implements CommandExecutor, TabCompleter
         this.addCommand(this.commandHelp);
         this.label = label;
         this.aliases = aliases;
-        RoidDungeons.getInstance().getCommand(label).setExecutor(this);
-        RoidDungeons.getInstance().getCommand(label).setTabCompleter(this);
+        RoidCore.getInstance().getCommand(label).setExecutor(this);
+        RoidCore.getInstance().getCommand(label).setTabCompleter(this);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
             if (commandSender.hasPermission(commandHelp.getPermission()) || !commandHelp.requiresPermission()) {
                 commandHelp.execute(commandSender, args);
             } else {
-                commandSender.sendMessage(RoidDungeons.getMessageConfig().getNoPermissionMessage());
+                commandSender.sendMessage(RoidCore.getInstance().getConfig().getNoPermissionMessage());
             }
             return true;
         }
@@ -63,13 +63,13 @@ public class CommandManager implements CommandExecutor, TabCompleter
 
             // Handle player-only command
             if (subcommand.isPlayerOnly() && !(commandSender instanceof Player)) {
-                commandSender.sendMessage(RoidDungeons.getMessageConfig().getOnlyPlayersCommandMessage());
+                commandSender.sendMessage(RoidCore.getInstance().getConfig().getOnlyPlayersCommandMessage());
                 return true;
             }
 
             // Check permission
             if (subcommand.requiresPermission() && !commandSender.hasPermission(subcommand.getPermission()) && !commandSender.isOp()) {
-                commandSender.sendMessage(RoidDungeons.getMessageConfig().getNoPermissionMessage());
+                commandSender.sendMessage(RoidCore.getInstance().getConfig().getNoPermissionMessage());
                 return true;
             }
 
@@ -96,7 +96,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
         }
 
         // If the command entered isn't valid
-        commandSender.sendMessage(RoidCore.getMessageConfig().getInvalidCommandMessage());
+        commandSender.sendMessage(RoidCore.getInstance().getConfig().getInvalidCommandMessage());
         return true;
     }
 
