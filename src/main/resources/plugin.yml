@@ -1,0 +1,5 @@
+name: RoidCore
+version: '1.0'
+main: me.timjuice.roidCore.RoidCore
+api-version: '1.21'
+authors: [ timjuice ]
