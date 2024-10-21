@@ -1,8 +1,9 @@
 plugins {
     id 'java'
+    id 'maven-publish' // Add Maven Publish plugin
 }
 
-group = 'me.timjuice'
+group = 'me.timjuice' // Update to match your package structure
 version = '1.0'
 
 repositories {
@@ -48,5 +49,43 @@ processResources {
     filteringCharset 'UTF-8'
     filesMatching('plugin.yml') {
         expand props
+    }
+}
+
+// Add publishing tasks for JitPack
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            groupId = 'me.timjuice' // Set your group ID
+            artifactId = 'core-plugin' // Artifact name
+            version = '1.0' // Plugin version
+
+            pom {
+                name = 'Core Plugin'
+                description = 'This is the core plugin used across other plugins'
+                url = 'https://github.com/your-username/core-plugin'
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/your-username/core-plugin.git'
+                    developerConnection = 'scm:git:ssh://github.com/your-username/core-plugin.git'
+                    url = 'https://github.com/your-username/core-plugin'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri("${buildDir}/repos")
+        }
     }
 }
