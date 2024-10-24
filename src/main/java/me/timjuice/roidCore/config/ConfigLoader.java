@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -148,6 +149,26 @@ public class ConfigLoader {
             }
         }
         return "";
+    }
+
+    /**
+     * Safely loads a ConfigurationSection from the config, with error handling.
+     *
+     * @param path The path to the ConfigurationSection.
+     * @return The ConfigurationSection, or null if not found.
+     */
+    public ConfigurationSection getConfigurationSection(String path) {
+        if (config.contains(path)) {
+            ConfigurationSection section = config.getConfigurationSection(path);
+            if (section != null) {
+                return section;
+            } else {
+                ConsoleLogger.warning(plugin, "Configuration section at path '" + path + "' is null.");
+            }
+        } else {
+            ConsoleLogger.warning(plugin, "Configuration section at path '" + path + "' does not exist.");
+        }
+        return null; // Return null if the section is not found or is invalid
     }
 
     /**
