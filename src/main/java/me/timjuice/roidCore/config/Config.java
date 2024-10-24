@@ -5,6 +5,8 @@ import me.timjuice.roidCore.utils.ConsoleLogger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+
 @Getter
 public class Config {
 
@@ -19,7 +21,7 @@ public class Config {
 
     public Config(JavaPlugin plugin) {
         // Initialize the config loader
-        this.configLoader = new ConfigLoader(plugin);
+        this.configLoader = new ConfigLoader(plugin, new File(plugin.getDataFolder(), "config.yml"));
         loadConfig(plugin);  // Load the configuration
     }
 
@@ -30,11 +32,11 @@ public class Config {
         FileConfiguration config = plugin.getConfig();
 
         // Load each configuration value with validation
-        helpMessageHeader = configLoader.getColoredString(config, "help-message-header");
-        helpCategoryHeader = configLoader.getColoredString(config, "help-category-header");
-        noPermissionMessage = configLoader.getColoredString(config, "no-permission-message");
-        onlyPlayersCommandMessage = configLoader.getColoredString(config, "only-players-command");
-        invalidCommandMessage = configLoader.getColoredString(config, "invalid-command-message");
+        helpMessageHeader = configLoader.getColoredString("help-message-header");
+        helpCategoryHeader = configLoader.getColoredString("help-category-header");
+        noPermissionMessage = configLoader.getColoredString("no-permission-message");
+        onlyPlayersCommandMessage = configLoader.getColoredString("only-players-command");
+        invalidCommandMessage = configLoader.getColoredString("invalid-command-message");
 
         // Log successful loading
         ConsoleLogger.success(plugin, "Configuration successfully loaded.");

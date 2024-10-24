@@ -6,10 +6,12 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,17 +19,19 @@ import java.util.stream.Collectors;
 
 public class ConfigLoader {
     private final JavaPlugin plugin;
+    private final File configFile;
     private final FileConfiguration config;
 
-    public ConfigLoader(JavaPlugin plugin) {
+    public ConfigLoader(JavaPlugin plugin, File configFile) {
         this.plugin = plugin;
-        this.config = plugin.getConfig();
+        this.configFile = configFile;
+        config = YamlConfiguration.loadConfiguration(configFile);
     }
 
     /**
      * Safely loads an integer from the config, with validation and default value support.
      */
-    public int getInt(FileConfiguration config, String path, int defaultValue) {
+    public int getInt(String path, int defaultValue) {
         if (config.contains(path)) {
             try {
                 return config.getInt(path);
@@ -38,14 +42,14 @@ public class ConfigLoader {
         return defaultValue;
     }
 
-    public int getInt(FileConfiguration config, String path) {
-        return getInt(config, path, 0);
+    public int getInt(String path) {
+        return getInt(path, 0);
     }
 
     /**
      * Safely loads a double from the config, with validation and default value support.
      */
-    public double getDouble(FileConfiguration config, String path, double defaultValue) {
+    public double getDouble(String path, double defaultValue) {
         if (config.contains(path)) {
             try {
                 return config.getDouble(path);
@@ -56,14 +60,14 @@ public class ConfigLoader {
         return defaultValue;
     }
 
-    public double getDouble(FileConfiguration config, String path) {
-        return getDouble(config, path, 0.0);
+    public double getDouble(String path) {
+        return getDouble(path, 0.0);
     }
 
     /**
      * Safely loads a long from the config, with validation and default value support.
      */
-    public long getLong(FileConfiguration config, String path, long defaultValue) {
+    public long getLong(String path, long defaultValue) {
         if (config.contains(path)) {
             try {
                 return config.getLong(path);
@@ -74,14 +78,14 @@ public class ConfigLoader {
         return defaultValue;
     }
 
-    public long getLong(FileConfiguration config, String path) {
-        return getLong(config, path, 0L);
+    public long getLong(String path) {
+        return getLong(path, 0L);
     }
 
     /**
      * Safely loads a boolean from the config, with validation and default value support.
      */
-    public boolean getBoolean(FileConfiguration config, String path, boolean defaultValue) {
+    public boolean getBoolean(String path, boolean defaultValue) {
         if (config.contains(path)) {
             try {
                 return config.getBoolean(path);
@@ -92,14 +96,14 @@ public class ConfigLoader {
         return defaultValue;
     }
 
-    public boolean getBoolean(FileConfiguration config, String path) {
-        return getBoolean(config, path, false);
+    public boolean getBoolean(String path) {
+        return getBoolean(path, false);
     }
 
     /**
      * Safely loads a String from the config, with validation and default value support.
      */
-    public String getString(FileConfiguration config, String path, String defaultValue) {
+    public String getString(String path, String defaultValue) {
         if (config.contains(path)) {
             try {
                 return config.getString(path);
@@ -110,14 +114,14 @@ public class ConfigLoader {
         return defaultValue;
     }
 
-    public String getString(FileConfiguration config, String path) {
-        return getString(config, path, null);
+    public String getString(String path) {
+        return getString(path, null);
     }
 
     /**
      * Safely loads a list of strings from the config, with validation and default value support.
      */
-    public List<String> getStringList(FileConfiguration config, String path, List<String> defaultValue) {
+    public List<String> getStringList(String path, List<String> defaultValue) {
         if (config.contains(path)) {
             try {
                 return config.getStringList(path);
@@ -128,14 +132,14 @@ public class ConfigLoader {
         return defaultValue;
     }
 
-    public List<String> getStringList(FileConfiguration config, String path) {
-        return getStringList(config, path, new ArrayList<>());
+    public List<String> getStringList(String path) {
+        return getStringList(path, new ArrayList<>());
     }
 
     /**
      * Safely loads a String from the config, with validation and default value support.
      */
-    public String getColoredString(FileConfiguration config, String path) {
+    public String getColoredString(String path) {
         if (config.contains(path)) {
             try {
                 return ChatColor.translateAlternateColorCodes('&', config.getString(path));
@@ -147,13 +151,13 @@ public class ConfigLoader {
     }
 
     /**
-     * Safely loads a List<String> from the config, with color code translation and validation.
+     * Safely loads a List<String> from the with color code translation and validation.
      *
      * @param config The FileConfiguration object (e.g., plugin.getConfig()).
      * @param path   The path in the config to retrieve the list.
      * @return A list of color-translated strings, or an empty list if the path is invalid or not found.
      */
-    public List<String> getColoredStringList(FileConfiguration config, String path) {
+    public List<String> getColoredStringList(String path) {
         if (config.contains(path)) {
             List<String> rawList = config.getStringList(path);
 
@@ -171,7 +175,7 @@ public class ConfigLoader {
     /**
      * Safely loads a Material from the config, with validation and default value support.
      */
-    public Material getMaterial(FileConfiguration config, String path, Material defaultValue) {
+    public Material getMaterial(String path, Material defaultValue) {
         if (config.contains(path)) {
             String materialName = config.getString(path);
             try {
@@ -186,7 +190,7 @@ public class ConfigLoader {
     /**
      * Safely loads a Location from the config with optional yaw and pitch support.
      */
-    public Location getLocation(FileConfiguration config, String path, World world, Location defaultLocation) {
+    public Location getLocation(String path, World world, Location defaultLocation) {
         if (config.contains(path)) {
             try {
                 double x = config.getDouble(path + ".x");
@@ -205,7 +209,7 @@ public class ConfigLoader {
     /**
      * Safely loads an ItemStack from the config, with validation and default value support.
      */
-    public ItemStack getItemStack(FileConfiguration config, String path, ItemStack defaultItem) {
+    public ItemStack getItemStack(String path, ItemStack defaultItem) {
         if (config.contains(path)) {
             try {
                 String materialName = config.getString(path + ".material", "STONE");
