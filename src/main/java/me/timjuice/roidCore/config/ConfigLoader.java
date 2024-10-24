@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +38,10 @@ public class ConfigLoader {
         return defaultValue;
     }
 
+    public int getInt(FileConfiguration config, String path) {
+        return getInt(config, path, 0);
+    }
+
     /**
      * Safely loads a double from the config, with validation and default value support.
      */
@@ -49,6 +54,10 @@ public class ConfigLoader {
             }
         }
         return defaultValue;
+    }
+
+    public double getDouble(FileConfiguration config, String path) {
+        return getDouble(config, path, 0.0);
     }
 
     /**
@@ -65,6 +74,10 @@ public class ConfigLoader {
         return defaultValue;
     }
 
+    public long getLong(FileConfiguration config, String path) {
+        return getLong(config, path, 0L);
+    }
+
     /**
      * Safely loads a boolean from the config, with validation and default value support.
      */
@@ -77,6 +90,10 @@ public class ConfigLoader {
             }
         }
         return defaultValue;
+    }
+
+    public boolean getBoolean(FileConfiguration config, String path) {
+        return getBoolean(config, path, false);
     }
 
     /**
@@ -93,6 +110,10 @@ public class ConfigLoader {
         return defaultValue;
     }
 
+    public String getString(FileConfiguration config, String path) {
+        return getString(config, path, null);
+    }
+
     /**
      * Safely loads a list of strings from the config, with validation and default value support.
      */
@@ -105,6 +126,10 @@ public class ConfigLoader {
             }
         }
         return defaultValue;
+    }
+
+    public List<String> getStringList(FileConfiguration config, String path) {
+        return getStringList(config, path, new ArrayList<>());
     }
 
     /**
