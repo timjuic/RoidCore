@@ -153,7 +153,6 @@ public class ConfigLoader {
     /**
      * Safely loads a List<String> from the with color code translation and validation.
      *
-     * @param config The FileConfiguration object (e.g., plugin.getConfig()).
      * @param path   The path in the config to retrieve the list.
      * @return A list of color-translated strings, or an empty list if the path is invalid or not found.
      */
