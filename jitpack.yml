@@ -1,0 +1,6 @@
+jdk:
+  - openjdk21
+
+before_install:
+  - echo "Before Install"
+  - bash ensure-java-21 install

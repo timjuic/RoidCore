@@ -36,7 +36,7 @@ publishing {
     }
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(targetJavaVersion)
