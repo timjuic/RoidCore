@@ -39,7 +39,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
             if (commandSender.hasPermission(commandHelp.getPermission()) || !commandHelp.requiresPermission()) {
                 commandHelp.execute(commandSender, args);
             } else {
-                commandSender.sendMessage(RoidCore.getInstance().getConfig().getNoPermissionMessage());
+                commandSender.sendMessage(RoidCore.getInstance().getConf().getNoPermissionMessage());
             }
             return true;
         }
@@ -63,13 +63,13 @@ public class CommandManager implements CommandExecutor, TabCompleter
 
             // Handle player-only command
             if (subcommand.isPlayerOnly() && !(commandSender instanceof Player)) {
-                commandSender.sendMessage(RoidCore.getInstance().getConfig().getOnlyPlayersCommandMessage());
+                commandSender.sendMessage(RoidCore.getInstance().getConf().getOnlyPlayersCommandMessage());
                 return true;
             }
 
             // Check permission
             if (subcommand.requiresPermission() && !commandSender.hasPermission(subcommand.getPermission()) && !commandSender.isOp()) {
-                commandSender.sendMessage(RoidCore.getInstance().getConfig().getNoPermissionMessage());
+                commandSender.sendMessage(RoidCore.getInstance().getConf().getNoPermissionMessage());
                 return true;
             }
 
@@ -96,7 +96,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
         }
 
         // If the command entered isn't valid
-        commandSender.sendMessage(RoidCore.getInstance().getConfig().getInvalidCommandMessage());
+        commandSender.sendMessage(RoidCore.getInstance().getConf().getInvalidCommandMessage());
         return true;
     }
 

@@ -31,11 +31,11 @@ public class HelpCommand extends SubCommand
         }
 
         if (helpMessageSummary.isEmpty()) {
-            sender.sendMessage(RoidCore.getInstance().getConfig().getNoPermissionMessage());
+            sender.sendMessage(RoidCore.getInstance().getConf().getNoPermissionMessage());
             return;
         }
 
-        helpMessageSummary.add(0, RoidCore.getInstance().getConfig().getHelpMessageHeader());
+        helpMessageSummary.add(0, RoidCore.getInstance().getConf().getHelpMessageHeader());
         for (String message : helpMessageSummary) {
             sender.sendMessage(message);
         }

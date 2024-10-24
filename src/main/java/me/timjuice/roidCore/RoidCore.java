@@ -8,7 +8,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class RoidCore extends JavaPlugin {
     @Getter
     private static RoidCore instance;
-    private Config config;
+    @Getter
+    private Config conf;
 
     @Override
     public void onEnable() {
