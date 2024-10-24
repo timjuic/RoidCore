@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 group = 'me.timjuice'
@@ -22,6 +23,17 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = 'me.timjuice'  // Customize this to your desired group ID
+            artifactId = 'roid-core'  // Customize this to match your project name
+            version = '1.0'  // Version of the project
+        }
+    }
 }
 
 def targetJavaVersion = 21
