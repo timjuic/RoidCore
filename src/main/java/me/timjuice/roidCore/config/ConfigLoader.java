@@ -38,6 +38,34 @@ public class ConfigLoader {
     }
 
     /**
+     * Safely loads a double from the config, with validation and default value support.
+     */
+    public double getDouble(FileConfiguration config, String path, double defaultValue) {
+        if (config.contains(path)) {
+            try {
+                return config.getDouble(path);
+            } catch (Exception e) {
+                ConsoleLogger.warning(plugin, "Invalid double format at path: " + path + ", using default value: " + defaultValue);
+            }
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Safely loads a long from the config, with validation and default value support.
+     */
+    public long getLong(FileConfiguration config, String path, long defaultValue) {
+        if (config.contains(path)) {
+            try {
+                return config.getLong(path);
+            } catch (Exception e) {
+                ConsoleLogger.warning(plugin, "Invalid long format at path: " + path + ", using default value: " + defaultValue);
+            }
+        }
+        return defaultValue;
+    }
+
+    /**
      * Safely loads a boolean from the config, with validation and default value support.
      */
     public boolean getBoolean(FileConfiguration config, String path, boolean defaultValue) {
