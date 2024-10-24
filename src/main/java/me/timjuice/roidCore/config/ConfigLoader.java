@@ -1,10 +1,7 @@
 package me.timjuice.roidCore.config;
 
 import me.timjuice.roidCore.utils.ConsoleLogger;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -13,6 +10,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -254,5 +252,16 @@ public class ConfigLoader {
             }
         }
         return defaultItem;
+    }
+
+    public void saveConfigAsync() {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                // Save the entire config object to the config file
+                config.save(configFile);
+            } catch (IOException e) {
+                e.printStackTrace(); // Handle the exception as needed
+            }
+        });
     }
 }
