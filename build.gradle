@@ -29,17 +29,17 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            groupId = 'me.timjuice'  // Customize this to your desired group ID
+            groupId = 'com.github.timjuice'  // Customize this to your desired group ID
             artifactId = 'RoidCore'  // Customize this to match your project name
             version = '1.0'  // Version of the project
         }
     }
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = 17
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     }
 }
 
