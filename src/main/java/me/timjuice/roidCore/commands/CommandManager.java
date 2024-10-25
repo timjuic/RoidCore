@@ -151,7 +151,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         // Check if the sender has permission for the base command
-        if (!(sender.hasPermission("dungeons") || sender.isOp())) {
+        if (!(sender.hasPermission(basePermission) || sender.isOp())) {
             return Collections.emptyList(); // Return no suggestions if base permission is not present
         }
 
