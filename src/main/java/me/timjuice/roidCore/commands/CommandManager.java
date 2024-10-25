@@ -3,6 +3,7 @@ package me.timjuice.roidCore.commands;
 import lombok.Getter;
 import lombok.Setter;
 import me.timjuice.roidCore.RoidCore;
+import me.timjuice.roidCore.commands.arguments.CommandArgument;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -98,6 +99,12 @@ public class CommandManager implements CommandExecutor, TabCompleter
             if ((args.length - argsOffset) < subcommand.getMinArgs()) {
                 commandSender.sendMessage(ChatColor.RED + "Not enough args! Use: " + ChatColor.DARK_RED + String.format("/%s %s %s", getBaseCmdName(), subcommand.getName(), subcommand.getSyntax()));
                 return true;
+            }
+
+            // Validate and convert arguments
+            Object[] convertedArgs = validateAndConvertArguments(subcommand, Arrays.copyOfRange(args, argsOffset, args.length), commandSender);
+            if (convertedArgs == null) {
+                return true; // An error message has already been sent
             }
 
             // Handle cooldown logic
@@ -213,5 +220,26 @@ public class CommandManager implements CommandExecutor, TabCompleter
     // Update the player's cooldown for a specific subcommand
     private void updateCooldown(Player player, SubCommand subcommand) {
         cooldowns.computeIfAbsent(player.getUniqueId(), k -> new HashMap<>()).put(subcommand.getName(), System.currentTimeMillis());
+    }
+
+    private Object[] validateAndConvertArguments(SubCommand subcommand, String[] args, CommandSender commandSender) {
+        // Check if the number of arguments is within the allowed range
+        if (args.length < subcommand.getMinArgs() || args.length > subcommand.getArguments().length) {
+            commandSender.sendMessage(ChatColor.RED + "Invalid number of arguments! Use: " + ChatColor.DARK_RED + String.format("/%s %s %s", getBaseCmdName(), subcommand.getName(), subcommand.getSyntax()));
+            return null; // Invalid argument count
+        }
+
+        Object[] convertedArgs = new Object[args.length];
+        for (int i = 0; i < args.length; i++) {
+            CommandArgument<?> argType = subcommand.getArguments()[i];
+            if (!argType.isValid(args[i])) {
+                // Send the error message specific to the argument type
+                commandSender.sendMessage(ChatColor.RED + argType.getErrorMessage(args[i]));
+                return null; // Invalid argument
+            }
+            convertedArgs[i] = argType.convert(args[i]); // Convert the argument
+        }
+
+        return convertedArgs; // Return successfully converted arguments
     }
 }
