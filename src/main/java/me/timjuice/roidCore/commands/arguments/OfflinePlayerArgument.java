@@ -27,7 +27,7 @@ public class OfflinePlayerArgument extends CommandArgument<OfflinePlayer> {
 
     @Override
     public String getErrorMessage(String input) {
-        return tc("Offline player: " + input + " was not found!");
+        return tc(String.format("&cInvalid argument '%s'. Offline player: '%s' was not found!", this.getName(), input));
     }
 
     @Override

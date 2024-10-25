@@ -23,7 +23,7 @@ public class InfiniteStringArgument extends CommandArgument<String[]> {
 
     @Override
     public String getErrorMessage(String input) {
-        return tc("Invalid input for infinite argument: " + input);
+        return tc(String.format("&cInvalid input for infinite argument: '%s'", input));
     }
 
     @Override

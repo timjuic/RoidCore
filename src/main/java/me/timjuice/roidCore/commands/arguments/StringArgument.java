@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static me.timjuice.roidCore.utils.FormatUtil.tc;
+
 public class StringArgument extends CommandArgument<String> {
     private final List<String> options; // Predefined options for this argument type
 
@@ -29,9 +31,9 @@ public class StringArgument extends CommandArgument<String> {
     @Override
     public String getErrorMessage(String input) {
         if (options.isEmpty()) {
-            return "Invalid argument: " + input; // General error if no options
+            return tc(String.format("&cInvalid argument: '%s'", input));
         }
-        return "Invalid argument: " + input + ". Expected one of: " + String.join(", ", options); // Error message with options
+        return tc(String.format("&cInvalid argument: '%s'. Expected: %s", input, String.join(", ", options)));
     }
 
     @Override

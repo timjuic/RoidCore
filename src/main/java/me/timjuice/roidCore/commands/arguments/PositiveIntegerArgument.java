@@ -6,29 +6,25 @@ import java.util.List;
 
 import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
-public class IntegerArgument extends CommandArgument<Integer> {
-    public IntegerArgument(String name, boolean required) {
+public class PositiveIntegerArgument extends IntegerArgument {
+
+    public PositiveIntegerArgument(String name, boolean required) {
         super(name, required);
     }
 
     @Override
     public boolean isValid(String input) {
         try {
-            Integer.parseInt(input);
-            return true;
+            int value = Integer.parseInt(input);
+            return value > 0;
         } catch (NumberFormatException e) {
             return false;
         }
     }
 
     @Override
-    public Integer convert(String input) {
-        return Integer.parseInt(input);
-    }
-
-    @Override
     public String getErrorMessage(String input) {
-        return generateErrorMessage(input, "A positive number value (e.g., 10, 25).");
+        return tc(String.format("&cInvalid positive integer input: '%s'. Must be a positive integer.", input));
     }
 
     @Override

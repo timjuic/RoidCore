@@ -24,6 +24,10 @@ public abstract class CommandArgument<T> {
     // Optional: Abstract method for error message (if needed)
     public abstract String getErrorMessage(String input);
 
+    protected String generateErrorMessage(String input, String expected) {
+        return String.format("&cInvalid argument '%s': '%s'. Expected: %s.", getName(), input, expected);
+    }
+
     // Optional: Abstract method for tab completion suggestions (if needed)
     public abstract List<String> getSuggestions(CommandSender sender, String currentInput);
 

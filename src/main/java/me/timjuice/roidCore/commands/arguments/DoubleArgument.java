@@ -31,14 +31,11 @@ public class DoubleArgument extends CommandArgument<Double> {
 
     @Override
     public String getErrorMessage(String input) {
-        return tc("Player not found: " + input);
+        return generateErrorMessage(input, "A valid double value (e.g., 10.5)");
     }
 
     @Override
     public List<String> getSuggestions(CommandSender sender, String currentInput) {
-        return Bukkit.getOnlinePlayers().stream()
-                .map(Player::getName)
-                .filter(name -> name.toLowerCase().startsWith(currentInput.toLowerCase()))
-                .collect(Collectors.toList()); // Provide online player names as suggestions
+        return List.of(); // No specific suggestions for longs
     }
 }

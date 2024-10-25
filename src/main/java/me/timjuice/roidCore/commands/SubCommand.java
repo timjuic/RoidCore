@@ -99,7 +99,20 @@ public abstract class SubCommand {
     public abstract void execute(CommandSender sender, Arguments args);
 
     public List<String> onTabComplete(CommandSender sender, String[] args) {
-        return Collections.emptyList();  // Default behavior: no tab suggestions
+        List<String> suggestions = new ArrayList<>();
+
+        // Loop through the arguments defined for this subcommand
+        for (int i = 0; i < arguments.length; i++) {
+            CommandArgument<?> argument = arguments[i];
+
+            // If we are at the current argument position in args, suggest completions
+            if (i == args.length - 1) {
+                suggestions.addAll(argument.getSuggestions(sender, args[i]));
+                break; // Once we find the correct position, stop the loop
+            }
+        }
+
+        return suggestions;
     }
 
     public static class Builder {

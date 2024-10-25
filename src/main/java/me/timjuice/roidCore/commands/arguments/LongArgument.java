@@ -28,7 +28,7 @@ public class LongArgument extends CommandArgument<Long> {
 
     @Override
     public String getErrorMessage(String input) {
-        return tc("Invalid long input: " + input);
+        return tc(String.format("&cInvalid long input: '%s'", input));
     }
 
     @Override
