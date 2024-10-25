@@ -26,4 +26,8 @@ public abstract class CommandArgument<T> {
 
     // Optional: Abstract method for tab completion suggestions (if needed)
     public abstract List<String> getSuggestions(CommandSender sender, String currentInput);
+
+    public String getUsage() {
+        return required ? "<" + name + ">" : "[" + name + "]";
+    }
 }

@@ -1,6 +1,7 @@
 package me.timjuice.roidCore.commands;
 
 import me.timjuice.roidCore.RoidCore;
+import me.timjuice.roidCore.commands.arguments.Arguments;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -15,13 +16,13 @@ public class HelpCommand extends SubCommand {
     public HelpCommand(CommandManager baseCommand) {
 //        super("help", new String[]{}, "Help command", "", "", 0, false, false, "General");
         super(new SubCommand.Builder("help")
-                .description("Help command")
+                .setDescription("Help command")
         );
         this.baseCommand = baseCommand;
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
+    public void execute(CommandSender sender, Arguments args) {
         Map<String, List<SubCommand>> groupedCommands = new HashMap<>();
 
         // Group commands by their group attribute

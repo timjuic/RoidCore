@@ -2,6 +2,7 @@ package me.timjuice.roidCore.commands;
 
 import com.google.common.collect.Sets;
 import lombok.Getter;
+import me.timjuice.roidCore.commands.arguments.Arguments;
 import me.timjuice.roidCore.commands.arguments.CommandArgument;
 import org.bukkit.command.CommandSender;
 
@@ -70,6 +71,16 @@ public abstract class SubCommand {
         return !this.permission.isEmpty();
     }
 
+    public String getUsage() {
+        StringBuilder usageBuilder = new StringBuilder();
+
+        for (CommandArgument<?> argument : this.getArguments()) {
+            usageBuilder.append(argument.getUsage()).append(" ");
+        }
+
+        return usageBuilder.toString().trim();
+    }
+
     public int getMinArgs() {
         int count = 0;
         for (CommandArgument<?> arg : arguments) {
@@ -85,7 +96,7 @@ public abstract class SubCommand {
         return arguments.length; // Total number of arguments
     }
 
-    public abstract void execute(CommandSender sender, String[] args);
+    public abstract void execute(CommandSender sender, Arguments args);
 
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         return Collections.emptyList();  // Default behavior: no tab suggestions
@@ -107,17 +118,17 @@ public abstract class SubCommand {
             this.name = name;
         }
 
-        public Builder aliases(String... aliases) {
+        public Builder setAliases(String... aliases) {
             this.aliases = new HashSet<>(Arrays.asList(aliases));
             return this;
         }
 
-        public Builder description(String description) {
+        public Builder setDescription(String description) {
             this.description = description;
             return this;
         }
 
-        public Builder permission(String permission) {
+        public Builder setPermission(String permission) {
             this.permission = permission;
             return this;
         }
@@ -127,22 +138,22 @@ public abstract class SubCommand {
             return this;
         }
 
-        public Builder playerOnly(boolean playerOnly) {
+        public Builder setPlayerOnly(boolean playerOnly) {
             this.playerOnly = playerOnly;
             return this;
         }
 
-        public Builder registerDirectly(boolean registerDirectly) {
+        public Builder setRegisterDirectly(boolean registerDirectly) {
             this.registerDirectly = registerDirectly;
             return this;
         }
 
-        public Builder cooldown(int cooldown) {
+        public Builder setCooldown(int cooldown) {
             this.cooldown = cooldown;
             return this;
         }
 
-        public Builder group(String group) {
+        public Builder setGroup(String group) {
             this.group = group;
             return this;
         }

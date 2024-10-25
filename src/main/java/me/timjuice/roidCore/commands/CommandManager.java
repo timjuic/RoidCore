@@ -3,15 +3,16 @@ package me.timjuice.roidCore.commands;
 import lombok.Getter;
 import lombok.Setter;
 import me.timjuice.roidCore.RoidCore;
+import me.timjuice.roidCore.commands.arguments.Arguments;
 import me.timjuice.roidCore.commands.arguments.CommandArgument;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,14 +29,19 @@ public class CommandManager implements CommandExecutor, TabCompleter
     private final String[] aliases;
     private final Map<UUID, Map<String, Long>> cooldowns = new HashMap<>();
     private final Plugin plugin;
+    private final String baseDescription;
 
-    public CommandManager(Plugin plugin, String baseCmdName, String basePermission, String[] aliases) {
+    public CommandManager(Plugin plugin, String baseCmdName, String basePermission, String baseDescription, String[] aliases) {
         this.plugin = plugin;
-        this.commandHelp = new HelpCommand(this);
-        this.addCommand(this.commandHelp);
         this.baseCmdName = baseCmdName;
         this.basePermission = basePermission;
+        this.baseDescription = baseDescription;
         this.aliases = (aliases != null) ? aliases : new String[0]; // Default to empty array if null
+
+        this.registerCommand();
+
+        this.commandHelp = new HelpCommand(this);
+        this.addCommand(this.commandHelp);
 
         // Set executor and tab completer
         if (RoidCore.getInstance().getCommand(baseCmdName) != null) {
@@ -45,11 +51,35 @@ public class CommandManager implements CommandExecutor, TabCompleter
     }
 
     public CommandManager(Plugin plugin, String baseCmdName, String[] aliases) {
-        this(plugin, baseCmdName, null, aliases);
+        this(plugin, baseCmdName, "", "Base " + baseCmdName + " command", aliases);
     }
 
     public CommandManager(Plugin plugin, String baseCmdName) {
-        this(plugin, baseCmdName, null, null);
+        this(plugin, baseCmdName, "", "Base " + baseCmdName + " command", null);
+    }
+
+    public void registerCommand() {
+        try {
+            Field f = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            f.setAccessible(true);
+            CommandMap commandMap = (CommandMap) f.get(Bukkit.getServer());
+            Command baseCommand = new Command(baseCmdName, "Base command description", "/" + baseCmdName, List.of(aliases)) {
+                @Override
+                public boolean execute(CommandSender sender, String label, String[] args) {
+                    return onCommand(sender, this, label, args);  // Delegate to CommandManager's onCommand
+                }
+
+                @Override
+                public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
+                    return onTabComplete(sender, this, alias, args);  // Delegate to CommandManager's onTabComplete
+                }
+            };
+
+            // Register the command
+            commandMap.register(plugin.getName(), baseCommand);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -59,7 +89,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
         // If no arguments are provided and the command is the base command
         if (args.length == 0 && command.getName().equalsIgnoreCase(this.getBaseCmdName())) {
             if (commandSender.hasPermission(commandHelp.getPermission()) || !commandHelp.requiresPermission()) {
-                commandHelp.execute(commandSender, args);
+                commandHelp.execute(commandSender, new Arguments(plugin));
             } else {
                 commandSender.sendMessage(RoidCore.getInstance().getConf().getNoPermissionMessage());
             }
@@ -97,13 +127,13 @@ public class CommandManager implements CommandExecutor, TabCompleter
 
             // Check argument count
             if ((args.length - argsOffset) < subcommand.getMinArgs()) {
-                commandSender.sendMessage(ChatColor.RED + "Not enough args! Use: " + ChatColor.DARK_RED + String.format("/%s %s %s", getBaseCmdName(), subcommand.getName(), subcommand.getSyntax()));
+                commandSender.sendMessage(ChatColor.RED + "Not enough args! Use: " + ChatColor.DARK_RED + String.format("/%s %s %s", getBaseCmdName(), subcommand.getName(), subcommand.getUsage()));
                 return true;
             }
 
             // Validate and convert arguments
-            Object[] convertedArgs = validateAndConvertArguments(subcommand, Arrays.copyOfRange(args, argsOffset, args.length), commandSender);
-            if (convertedArgs == null) {
+            Arguments arguments = validateAndConvertArguments(subcommand, Arrays.copyOfRange(args, argsOffset, args.length), commandSender);
+            if (arguments == null) {
                 return true; // An error message has already been sent
             }
 
@@ -119,7 +149,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
             }
 
             // Execute the subcommand
-            subcommand.execute(commandSender, Arrays.copyOfRange(args, argsOffset, args.length));
+            subcommand.execute(commandSender, arguments);
             return true;
         }
 
@@ -222,24 +252,36 @@ public class CommandManager implements CommandExecutor, TabCompleter
         cooldowns.computeIfAbsent(player.getUniqueId(), k -> new HashMap<>()).put(subcommand.getName(), System.currentTimeMillis());
     }
 
-    private Object[] validateAndConvertArguments(SubCommand subcommand, String[] args, CommandSender commandSender) {
-        // Check if the number of arguments is within the allowed range
-        if (args.length < subcommand.getMinArgs() || args.length > subcommand.getArguments().length) {
-            commandSender.sendMessage(ChatColor.RED + "Invalid number of arguments! Use: " + ChatColor.DARK_RED + String.format("/%s %s %s", getBaseCmdName(), subcommand.getName(), subcommand.getSyntax()));
-            return null; // Invalid argument count
-        }
+    private Arguments validateAndConvertArguments(SubCommand subcommand, String[] args, CommandSender sender) {
+        CommandArgument<?>[] commandArguments = subcommand.getArguments();
+        // Create an instance of Arguments using the plugin reference
+        Arguments arguments = new Arguments(RoidCore.getInstance());
 
-        Object[] convertedArgs = new Object[args.length];
-        for (int i = 0; i < args.length; i++) {
-            CommandArgument<?> argType = subcommand.getArguments()[i];
-            if (!argType.isValid(args[i])) {
-                // Send the error message specific to the argument type
-                commandSender.sendMessage(ChatColor.RED + argType.getErrorMessage(args[i]));
-                return null; // Invalid argument
+        // Check for required arguments order and validate
+        for (int i = 0; i < commandArguments.length; i++) {
+            CommandArgument<?> arg = commandArguments[i];
+
+            // Check for minimum required arguments
+            if (i < subcommand.getMinArgs() && !arg.isRequired()) {
+                sender.sendMessage(arg.getErrorMessage(args[i]));
+                return null; // An error message has already been sent
             }
-            convertedArgs[i] = argType.convert(args[i]); // Convert the argument
+
+            // Validate and convert argument
+            if (i < args.length) {
+                if (!arg.isValid(args[i])) {
+                    sender.sendMessage(arg.getErrorMessage(args[i]));
+                    return null; // An error message has already been sent
+                }
+                // Convert to the specific type and store in Arguments
+                Object convertedValue = arg.convert(args[i]);
+                arguments.put(arg.getName(), convertedValue); // Store validated and converted argument
+            } else if (arg.isRequired()) {
+                sender.sendMessage("Missing required argument: " + arg.getName());
+                return null; // An error message has already been sent
+            }
         }
 
-        return convertedArgs; // Return successfully converted arguments
+        return arguments; // Return the populated Arguments instance
     }
 }
