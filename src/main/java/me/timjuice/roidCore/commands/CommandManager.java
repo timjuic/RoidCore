@@ -1,5 +1,7 @@
 package me.timjuice.roidCore.commands;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.timjuice.roidCore.RoidCore;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -7,6 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -16,18 +19,36 @@ public class CommandManager implements CommandExecutor, TabCompleter
 {
     private final LinkedHashMap<String, SubCommand> subCommands = new LinkedHashMap<>();
     private final HelpCommand commandHelp;
-    private final String label;
+    @Getter
+    private final String baseCmdName;
+    @Getter
+    @Setter
+    private String basePermission;
     private final String[] aliases;
     private final Map<UUID, Map<String, Long>> cooldowns = new HashMap<>();
+    private final Plugin plugin;
 
-    public CommandManager(String label, String[] aliases)
-    {
+    public CommandManager(Plugin plugin, String baseCmdName, String basePermission, String[] aliases) {
+        this.plugin = plugin;
         this.commandHelp = new HelpCommand(this);
         this.addCommand(this.commandHelp);
-        this.label = label;
-        this.aliases = aliases;
-        RoidCore.getInstance().getCommand(label).setExecutor(this);
-        RoidCore.getInstance().getCommand(label).setTabCompleter(this);
+        this.baseCmdName = baseCmdName;
+        this.basePermission = basePermission;
+        this.aliases = (aliases != null) ? aliases : new String[0]; // Default to empty array if null
+
+        // Set executor and tab completer
+        if (RoidCore.getInstance().getCommand(baseCmdName) != null) {
+            RoidCore.getInstance().getCommand(baseCmdName).setExecutor(this);
+            RoidCore.getInstance().getCommand(baseCmdName).setTabCompleter(this);
+        }
+    }
+
+    public CommandManager(Plugin plugin, String baseCmdName, String[] aliases) {
+        this(plugin, baseCmdName, null, aliases);
+    }
+
+    public CommandManager(Plugin plugin, String baseCmdName) {
+        this(plugin, baseCmdName, null, null);
     }
 
     @Override
@@ -96,7 +117,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
         }
 
         // If the command entered isn't valid
-        commandSender.sendMessage(RoidCore.getInstance().getConf().getInvalidCommandMessage());
+        commandSender.sendMessage(RoidCore.getInstance().getConf().getInvalidCommandMessage().replace("{PLUGIN_NAME}", plugin.getName()));
         return true;
     }
 
@@ -115,8 +136,6 @@ public class CommandManager implements CommandExecutor, TabCompleter
     public SubCommand getSubCommand(String subcommandName) {
         return subCommands.get(subcommandName);
     }
-
-    public String getBaseCmdName() { return label; }
 
     public Boolean subCommandExists(String searchName) {
         for (SubCommand subcommand : subCommands.values()) {

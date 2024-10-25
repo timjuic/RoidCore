@@ -5,40 +5,54 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class HelpCommand extends SubCommand
-{
+public class HelpCommand extends SubCommand {
     private final CommandManager baseCommand;
 
-    public HelpCommand(CommandManager baseCommand)
-    {
-        super("help", new String[]{}, "Help command", "", "", 0, false, false);
+    public HelpCommand(CommandManager baseCommand) {
+//        super("help", new String[]{}, "Help command", "", "", 0, false, false, "General");
+        super(new SubCommand.Builder("help")
+                .description("Help command")
+        );
         this.baseCommand = baseCommand;
     }
 
+    @Override
     public void execute(CommandSender sender, String[] args) {
-        SubCommand[] subcommands = baseCommand.getSubCommands().toArray(new SubCommand[0]);
+        Map<String, List<SubCommand>> groupedCommands = new HashMap<>();
+
+        // Group commands by their group attribute
+        for (SubCommand command : baseCommand.getSubCommands()) {
+            if (!sender.hasPermission(command.getPermission()) && !sender.isOp()) {
+                continue;
+            }
+            groupedCommands
+                    .computeIfAbsent(command.getGroup(), k -> new ArrayList<>())
+                    .add(command);
+        }
+
+        // Build help message grouped by each group
         List<String> helpMessageSummary = new ArrayList<>();
+        helpMessageSummary.add(RoidCore.getInstance().getConf().getHelpMessageHeader());
 
-        for (int i = 0; i < subcommands.length; i++) {
-            SubCommand command = subcommands[i];
-            if (!sender.hasPermission(command.getPermission()) && !sender.isOp()) continue;
-            String message = ChatColor.translateAlternateColorCodes(
-                    '&',
-                    String.format("&a/%s %s &f- &7%s", baseCommand.getBaseCmdName(), command.getName(), command.getDescription()));
-            helpMessageSummary.add(message);
+        for (Map.Entry<String, List<SubCommand>> entry : groupedCommands.entrySet()) {
+            String groupName = entry.getKey();
+            helpMessageSummary.add(ChatColor.BOLD + groupName + ":");
+
+            for (SubCommand command : entry.getValue()) {
+                String message = ChatColor.translateAlternateColorCodes('&',
+                        String.format("&a/%s %s &f- &7%s", baseCommand.getBaseCmdName(), command.getName(), command.getDescription()));
+                helpMessageSummary.add(message);
+            }
+            helpMessageSummary.add("");  // Blank line between groups
         }
 
-        if (helpMessageSummary.isEmpty()) {
-            sender.sendMessage(RoidCore.getInstance().getConf().getNoPermissionMessage());
-            return;
-        }
-
-        helpMessageSummary.add(0, RoidCore.getInstance().getConf().getHelpMessageHeader());
+        // Send the messages to the command sender
         for (String message : helpMessageSummary) {
             sender.sendMessage(message);
         }
     }
-
 }
