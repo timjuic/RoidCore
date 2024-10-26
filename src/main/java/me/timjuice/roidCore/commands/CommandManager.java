@@ -158,7 +158,6 @@ public class CommandManager implements CommandExecutor, TabCompleter
     }
 
     public void addCommand(SubCommand subCommand) {
-        // Validate the subcommand's arguments before adding it
         validateSubCommand(subCommand);
 
         this.subCommands.put(subCommand.getClass().getName(), subCommand);
@@ -312,6 +311,16 @@ public class CommandManager implements CommandExecutor, TabCompleter
                 if (i < arguments.size() - 1) {
                     throw new IllegalArgumentException("Infinite string argument must be the last argument in subcommand '" + subCommand.getName() + "'.");
                 }
+            }
+        }
+
+        // Check if the subcommand name or any of its aliases already exist
+        if (subCommandExists(subCommand.getName())) {
+            throw new IllegalArgumentException("Subcommand name '" + subCommand.getName() + "' already exists.");
+        }
+        for (String alias : subCommand.getAliases()) {
+            if (subCommandExists(alias)) {
+                throw new IllegalArgumentException("Subcommand alias '" + alias + "' already exists.");
             }
         }
     }
