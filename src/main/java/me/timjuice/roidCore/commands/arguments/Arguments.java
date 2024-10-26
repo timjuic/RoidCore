@@ -2,7 +2,6 @@ package me.timjuice.roidCore.commands.arguments;
 
 import me.timjuice.roidCore.utils.ConsoleLogger;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -18,6 +17,11 @@ public class Arguments {
     private final HashMap<String, Object> arguments;
 
     /**
+     * The map of the flags.
+     */
+    private final HashMap<String, Boolean> flags;
+
+    /**
      * The plugin instance for logging purposes.
      */
     private final Plugin plugin;
@@ -28,6 +32,7 @@ public class Arguments {
      */
     public Arguments(Plugin plugin) {
         this.arguments = new HashMap<>();
+        this.flags = new HashMap<>();
         this.plugin = plugin;
     }
 
@@ -78,7 +83,7 @@ public class Arguments {
      * @param key The key of the argument.
      * @return True if the argument exists, false otherwise.
      */
-    public boolean contains(String key) {
+    public boolean has(String key) {
         return arguments.containsKey(key);
     }
 
@@ -96,5 +101,41 @@ public class Arguments {
      */
     public void clear() {
         arguments.clear();
+    }
+
+    /**
+     * Set a flag.
+     *
+     * @param key   The key of the flag.
+     */
+    public void setFlag(String key) {
+        flags.put(key, true);
+    }
+
+    /**
+     * Get a flag from the map.
+     *
+     * @param key The key of the flag.
+     * @return The flag value or false if it doesn't exist.
+     */
+    public boolean getFlag(String key) {
+        return flags.getOrDefault(key, false); // Return false if flag doesn't exist
+    }
+
+    /**
+     * Check if the map contains a specific flag.
+     *
+     * @param key The key of the flag.
+     * @return True if the flag exists, false otherwise.
+     */
+    public boolean hasFlag(String key) {
+        return flags.containsKey(key);
+    }
+
+    /**
+     * Clear all flags.
+     */
+    public void clearFlags() {
+        flags.clear();
     }
 }

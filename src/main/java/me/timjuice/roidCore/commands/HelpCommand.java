@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static me.timjuice.roidCore.utils.FormatUtil.tc;
-
 public class HelpCommand extends SubCommand {
     private final CommandManager baseCommand;
     private final RoidCore roidPlugin;
@@ -30,7 +28,7 @@ public class HelpCommand extends SubCommand {
     public void execute(CommandSender sender, Arguments args) {
         Map<String, List<SubCommand>> groupedCommands = new HashMap<>();
         List<SubCommand> allowedCommands = new ArrayList<>();
-        boolean isGroupRequested = args.contains("group");
+        boolean isGroupRequested = args.has("group");
         String requestedGroup;
 
         // Group commands by their group attribute and filter by permission

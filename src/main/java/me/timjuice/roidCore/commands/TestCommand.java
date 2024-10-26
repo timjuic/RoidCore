@@ -19,7 +19,9 @@ public class TestCommand extends SubCommand {
                 .addArgument(new PlayerArgument("receiver", true)) // Optional integer argument
                 .addArgument(new IntegerArgument("amount", true))
                 .addArgument(new BooleanArgument("enabled", true))
-                .addArgument(new InfiniteStringArgument("description", false)));
+                .addArgument(new InfiniteStringArgument("description", false))
+                .addFlag("-s")
+        );
     }
 
     @Override
@@ -27,12 +29,13 @@ public class TestCommand extends SubCommand {
         String dungeon = args.get("dungeon");
         Player receiver = args.get("receiver");
         int amount = args.get("amount");
+        boolean hasFlag = args.hasFlag("-s");
 
-        if (args.contains("description")) {
+        if (args.has("description")) {
             String[] description = args.get("description");
-            Bukkit.broadcastMessage(dungeon + " " + receiver.getName() + " " + amount + " " + String.join(" ", description));
+            Bukkit.broadcastMessage(dungeon + " " + receiver.getName() + " " + amount + " " + String.join(" ", description) + " " + hasFlag);
         } else {
-            Bukkit.broadcastMessage(dungeon + " " + receiver.getName() + " " + amount);
+            Bukkit.broadcastMessage(dungeon + " " + receiver.getName() + " " + amount + " " + hasFlag);
         }
     }
 }

@@ -258,31 +258,42 @@ public class CommandManager implements CommandExecutor, TabCompleter
 
         StringBuilder infiniteStringBuilder = new StringBuilder();
 
-        for (int i = 0; i < subcommandArgs.size(); i++) {
-            CommandArgument<?> arg = subcommandArgs.get(i);
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
 
-            // Validate and convert argument
-            if (i < args.length) {
-                if (!arg.isValid(args[i])) {
-                    sender.sendMessage(arg.getErrorMessage(args[i]));
+            // Check for flags
+            if (arg.startsWith("-")) {
+                String flagName = arg.substring(1).toLowerCase();
+                if (subcommand.getFlags().containsKey(flagName)) {
+                    arguments.setFlag(flagName);
+                    continue;
+                }
+            }
+
+            // Process regular arguments
+            if (i < subcommandArgs.size()) {
+                CommandArgument<?> commandArg = subcommandArgs.get(i);
+
+                if (!commandArg.isValid(arg)) {
+                    sender.sendMessage(commandArg.getErrorMessage(arg));
                     return null;
                 }
 
-                // Check if the current argument is an InfiniteStringArgument
-                if (arg instanceof InfiniteStringArgument) {
+                if (commandArg instanceof InfiniteStringArgument) {
                     String[] remainingArgs = Arrays.copyOfRange(args, i, args.length);
                     infiniteStringBuilder.append(String.join(" ", remainingArgs));
-                    Object convertedValue = arg.convert(infiniteStringBuilder.toString());
-                    arguments.put(arg.getName(), convertedValue); // Store validated and converted argument
+                    Object convertedValue = commandArg.convert(infiniteStringBuilder.toString());
+                    arguments.put(commandArg.getName(), convertedValue);
+                    // Skipped breaking, to allow flags at the end
+//                    break; // Stop processing further arguments as InfiniteStringArgument consumes the rest
                 } else {
-                    // Convert to the specific type and store in Arguments
-                    Object convertedValue = arg.convert(args[i]);
-                    arguments.put(arg.getName(), convertedValue); // Store validated and converted argument
+                    Object convertedValue = commandArg.convert(arg);
+                    arguments.put(commandArg.getName(), convertedValue);
                 }
             }
         }
 
-        return arguments; // Return the populated Arguments instance
+        return arguments;
     }
 
 
