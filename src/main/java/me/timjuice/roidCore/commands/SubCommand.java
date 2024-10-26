@@ -19,10 +19,10 @@ public abstract class SubCommand {
     private final boolean registerDirectly;
     private final int cooldown;
     private final String group;
-    private final CommandArgument<?>[] arguments; // Add arguments array
+    private final List<CommandArgument<?>> arguments; // Add arguments array
 
     // Main constructor with cooldown
-    protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, boolean playerOnly, boolean registerDirectly, int cooldown, String group, CommandArgument<?>[] arguments) {
+    protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, boolean playerOnly, boolean registerDirectly, int cooldown, String group, List<CommandArgument<?>> arguments) {
         this.name = name;
         this.aliases = aliases;
         this.description = description;
@@ -45,22 +45,22 @@ public abstract class SubCommand {
         this.registerDirectly = builder.registerDirectly;
         this.cooldown = builder.cooldown;
         this.group = builder.group;
-        this.arguments = builder.arguments.toArray(new CommandArgument[0]);
+        this.arguments = builder.arguments;
     }
 
     // Overloaded constructor without cooldown and group (defaults to "General")
     protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, int minArgs, boolean playerOnly, boolean registerDirectly) {
-        this(name, aliases, description, permission, syntax, playerOnly, registerDirectly, 0, DefaultCommandGroup.NONE.getName(), new CommandArgument[0]); // Default to empty array
+        this(name, aliases, description, permission, syntax, playerOnly, registerDirectly, 0, DefaultCommandGroup.NONE.getName(), List.of()); // Default to empty array
     }
 
     // Overloaded constructor without cooldown, registerDirectly, and group (defaults to "General")
     protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, int minArgs, boolean playerOnly) {
-        this(name, aliases, description, permission, syntax, playerOnly, false, 0, DefaultCommandGroup.NONE.getName(), new CommandArgument[0]); // Default to empty array
+        this(name, aliases, description, permission, syntax, playerOnly, false, 0, DefaultCommandGroup.NONE.getName(), List.of()); // Default to empty array
     }
 
     // Overloaded constructor with cooldown but without registerDirectly and group (defaults to "General")
     protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, int minArgs, boolean playerOnly, int cooldown) {
-        this(name, aliases, description, permission, syntax, playerOnly, false, cooldown, DefaultCommandGroup.NONE.getName(), new CommandArgument[0]); // Default to empty array
+        this(name, aliases, description, permission, syntax, playerOnly, false, cooldown, DefaultCommandGroup.NONE.getName(), List.of()); // Default to empty array
     }
 
     public Set<String> getAliases() {
@@ -93,7 +93,7 @@ public abstract class SubCommand {
 
     // Get maximum arguments based on the total arguments defined
     public int getMaxArgs() {
-        return arguments.length; // Total number of arguments
+        return arguments.size(); // Total number of arguments
     }
 
     public abstract void execute(CommandSender sender, Arguments args);
@@ -102,8 +102,8 @@ public abstract class SubCommand {
         List<String> suggestions = new ArrayList<>();
 
         // Loop through the arguments defined for this subcommand
-        for (int i = 0; i < arguments.length; i++) {
-            CommandArgument<?> argument = arguments[i];
+        for (int i = 0; i < arguments.size(); i++) {
+            CommandArgument<?> argument = arguments.get(i);
 
             // If we are at the current argument position in args, suggest completions
             if (i == args.length - 1) {

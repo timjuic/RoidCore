@@ -13,7 +13,7 @@ public class InfiniteStringArgument extends CommandArgument<String[]> {
 
     @Override
     public boolean isValid(String input) {
-        return !input.isEmpty(); // Accepts any non-empty string
+        return !input.trim().isEmpty(); // Accepts any non-empty string
     }
 
     @Override

@@ -5,6 +5,7 @@ import lombok.Setter;
 import me.timjuice.roidCore.RoidCore;
 import me.timjuice.roidCore.commands.arguments.Arguments;
 import me.timjuice.roidCore.commands.arguments.CommandArgument;
+import me.timjuice.roidCore.commands.arguments.InfiniteStringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.*;
@@ -158,8 +159,10 @@ public class CommandManager implements CommandExecutor, TabCompleter
         return true;
     }
 
-    public void addCommand(SubCommand subCommand)
-    {
+    public void addCommand(SubCommand subCommand) {
+        // Validate the subcommand's arguments before adding it
+        validateSubCommand(subCommand);
+
         this.subCommands.put(subCommand.getClass().getName(), subCommand);
         if (subCommand.isRegisterDirectly()) {
             RoidCore.getInstance().getCommand(subCommand.getName()).setExecutor(this);
@@ -253,35 +256,65 @@ public class CommandManager implements CommandExecutor, TabCompleter
     }
 
     private Arguments validateAndConvertArguments(SubCommand subcommand, String[] args, CommandSender sender) {
-        CommandArgument<?>[] commandArguments = subcommand.getArguments();
-        // Create an instance of Arguments using the plugin reference
+        List<CommandArgument<?>> subcommandArgs = subcommand.getArguments();
         Arguments arguments = new Arguments(RoidCore.getInstance());
 
-        // Check for required arguments order and validate
-        for (int i = 0; i < commandArguments.length; i++) {
-            CommandArgument<?> arg = commandArguments[i];
+        StringBuilder infiniteStringBuilder = new StringBuilder();
 
-            // Check for minimum required arguments
-            if (i < subcommand.getMinArgs() && !arg.isRequired()) {
-                sender.sendMessage(arg.getErrorMessage(args[i]));
-                return null; // An error message has already been sent
-            }
+        for (int i = 0; i < subcommandArgs.size(); i++) {
+            CommandArgument<?> arg = subcommandArgs.get(i);
 
             // Validate and convert argument
             if (i < args.length) {
                 if (!arg.isValid(args[i])) {
                     sender.sendMessage(arg.getErrorMessage(args[i]));
-                    return null; // An error message has already been sent
+                    return null;
                 }
-                // Convert to the specific type and store in Arguments
-                Object convertedValue = arg.convert(args[i]);
-                arguments.put(arg.getName(), convertedValue); // Store validated and converted argument
-            } else if (arg.isRequired()) {
-                sender.sendMessage("Missing required argument: " + arg.getName());
-                return null; // An error message has already been sent
+
+                // Check if the current argument is an InfiniteStringArgument
+                if (arg instanceof InfiniteStringArgument) {
+                    String[] remainingArgs = Arrays.copyOfRange(args, i, args.length);
+                    infiniteStringBuilder.append(String.join(" ", remainingArgs));
+                    Object convertedValue = arg.convert(infiniteStringBuilder.toString());
+                    arguments.put(arg.getName(), convertedValue); // Store validated and converted argument
+                } else {
+                    // Convert to the specific type and store in Arguments
+                    Object convertedValue = arg.convert(args[i]);
+                    arguments.put(arg.getName(), convertedValue); // Store validated and converted argument
+                }
             }
         }
 
         return arguments; // Return the populated Arguments instance
+    }
+
+
+    private void validateSubCommand(SubCommand subCommand) {
+        List<CommandArgument<?>> arguments = subCommand.getArguments();
+
+        boolean hasOptionalArg = false;
+        boolean hasInfiniteStringArg = false;
+
+        for (int i = 0; i < arguments.size(); i++) {
+            CommandArgument<?> arg = arguments.get(i);
+
+            // Check if the argument is optional
+            if (!arg.isRequired()) {
+                hasOptionalArg = true;
+            } else if (hasOptionalArg) {
+                // A required argument comes after an optional argument
+                throw new IllegalArgumentException("Required argument '" + arg.getName() + "' cannot follow optional arguments in subcommand '" + subCommand.getName() + "'.");
+            }
+
+            // Check if the argument is an infinite string argument
+            if (arg instanceof InfiniteStringArgument) {
+                hasInfiniteStringArg = true;
+
+                // Ensure it is the last argument
+                if (i < arguments.size() - 1) {
+                    throw new IllegalArgumentException("Infinite string argument must be the last argument in subcommand '" + subCommand.getName() + "'.");
+                }
+            }
+        }
     }
 }

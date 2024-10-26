@@ -83,6 +83,15 @@ public class Arguments {
     }
 
     /**
+     * Get the amount of provided arguments
+     *
+     * @return amount of provided arguments
+     */
+    public int getAmount() {
+        return arguments.size();
+    }
+
+    /**
      * Clear all arguments.
      */
     public void clear() {

@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+
 public class TestCommand extends SubCommand {
     public TestCommand() {
         super(new SubCommand.Builder("test")
@@ -16,8 +17,8 @@ public class TestCommand extends SubCommand {
                 .addArgument(new StringArgument("dungeon", true, "dungeon1", "dungeon2", "dungeon3")) // Required string argument
                 .addArgument(new PlayerArgument("receiver", true)) // Optional integer argument
                 .addArgument(new IntegerArgument("amount", true))
-                .addArgument(new InfiniteStringArgument("description", false))
-                .addArgument(new BooleanArgument("enabled", true)));
+                .addArgument(new BooleanArgument("enabled", true))
+                .addArgument(new InfiniteStringArgument("description", false)));
     }
 
     @Override
@@ -25,8 +26,12 @@ public class TestCommand extends SubCommand {
         String dungeon = args.get("dungeon");
         Player receiver = args.get("receiver");
         int amount = args.get("amount");
-        String description = args.get("description");
 
-        Bukkit.broadcastMessage(dungeon + " " + receiver.getName() + " " + amount + " " + description );
+        if (args.contains("description")) {
+            String[] description = args.get("description");
+            Bukkit.broadcastMessage(dungeon + " " + receiver.getName() + " " + amount + " " + String.join(" ", description));
+        } else {
+            Bukkit.broadcastMessage(dungeon + " " + receiver.getName() + " " + amount);
+        }
     }
 }
