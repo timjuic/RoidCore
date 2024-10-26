@@ -6,7 +6,7 @@ import java.util.List;
 
 import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
-public class InfiniteStringArgument extends CommandArgument<String[]> {
+public class InfiniteStringArgument extends CommandArgument<String> {
     public InfiniteStringArgument(String name, boolean required) {
         super(name, required);
     }
@@ -17,8 +17,8 @@ public class InfiniteStringArgument extends CommandArgument<String[]> {
     }
 
     @Override
-    public String[] convert(String input) {
-        return input.split(" "); // Split by spaces to accept multiple strings
+    public String convert(String input) {
+        return input; // Split by spaces to accept multiple strings
     }
 
     @Override
