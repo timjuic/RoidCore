@@ -257,15 +257,21 @@ public class CommandManager implements CommandExecutor, TabCompleter
         Arguments arguments = new Arguments(roidPlugin);
 
         StringBuilder infiniteStringBuilder = new StringBuilder();
+        Bukkit.broadcastMessage(Arrays.toString(args));
+        String[] nonFlagArgs = args;
 
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
+        for (int i = 0; i < nonFlagArgs.length; i++) {
+            String arg = nonFlagArgs[i];
 
             // Check for flags
             if (arg.startsWith("-")) {
-                String flagName = arg.substring(1).toLowerCase();
-                if (subcommand.getFlags().containsKey(flagName)) {
-                    arguments.setFlag(flagName);
+                if (subcommand.getFlags().containsKey(arg)) {
+                    arguments.setFlag(arg);
+                    if (i == 0 && nonFlagArgs.length > 1) {
+                        nonFlagArgs = Arrays.copyOfRange(nonFlagArgs, 1, nonFlagArgs.length);
+                        i = -1; // Reset index to start from the beginning of the new array
+                    }
+                    // SHIFT FIRST ARGUMENT so it doesnt mess up the next real argument
                     continue;
                 }
             }
@@ -280,7 +286,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
                 }
 
                 if (commandArg instanceof InfiniteStringArgument) {
-                    String[] remainingArgs = Arrays.copyOfRange(args, i, args.length);
+                    String[] remainingArgs = Arrays.copyOfRange(nonFlagArgs, i, nonFlagArgs.length);
                     infiniteStringBuilder.append(String.join(" ", remainingArgs));
                     Object convertedValue = commandArg.convert(infiniteStringBuilder.toString());
                     arguments.put(commandArg.getName(), convertedValue);
