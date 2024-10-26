@@ -115,6 +115,10 @@ public abstract class SubCommand {
         return suggestions;
     }
 
+    public static Builder builder(String name) {
+        return new Builder(name);
+    }
+
     public static class Builder {
         private final String name;
         private Set<String> aliases = new HashSet<>();

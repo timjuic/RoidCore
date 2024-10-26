@@ -16,12 +16,12 @@ public class PlayerArgument extends CommandArgument<Player> {
 
     @Override
     public boolean isValid(String input) {
-        return Bukkit.getPlayer(input) != null; // Check if player is online
+        return Bukkit.getPlayerExact(input) != null; // Check if player is online
     }
 
     @Override
     public Player convert(String input) {
-        return Bukkit.getPlayer(input);
+        return Bukkit.getPlayerExact(input);
     }
 
     @Override

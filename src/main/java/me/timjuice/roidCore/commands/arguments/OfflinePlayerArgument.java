@@ -3,6 +3,7 @@ package me.timjuice.roidCore.commands.arguments;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +18,9 @@ public class OfflinePlayerArgument extends CommandArgument<OfflinePlayer> {
 
     @Override
     public boolean isValid(String input) {
-        return Bukkit.getOfflinePlayer(input) != null; // Check if the player exists
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(input);
+        if (offlinePlayer == null || !offlinePlayer.hasPlayedBefore()) return false;
+        return true;
     }
 
     @Override
@@ -32,9 +35,9 @@ public class OfflinePlayerArgument extends CommandArgument<OfflinePlayer> {
 
     @Override
     public List<String> getSuggestions(CommandSender sender, String currentInput) {
-        return Arrays.stream(Bukkit.getOfflinePlayers())
-                .filter(player -> player.getName() != null && player.getName().toLowerCase().startsWith(currentInput.toLowerCase()))
-                .map(OfflinePlayer::getName)
-                .collect(Collectors.toList()); // Provide offline players as suggestions
+        return Bukkit.getOnlinePlayers().stream()
+                .map(Player::getName)
+                .filter(name -> name.toLowerCase().startsWith(currentInput.toLowerCase()))
+                .collect(Collectors.toList()); // Provide online player names as suggestions
     }
 }

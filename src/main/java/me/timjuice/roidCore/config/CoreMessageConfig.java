@@ -46,6 +46,7 @@ public class CoreMessageConfig {
         config.addDefault("invalid-command-message", "&cThat command doesn't exist! Type /{PLUGIN_NAME} for help.");
         config.addDefault("help-command-group-format", "&a/{BASE_CMD} help {CMD_GROUP} &f- &7Shows {CMD_GROUP} commands");
         config.addDefault("help-individual-subcommand-format", "&a/{BASE_CMD} {SUB_CMD_NAME} &f- &7{SUB_CMD_DESCRIPTION}");
+        config.options().copyDefaults(true);
 
         // If the file doesn't exist, save defaults and create the file
         if (!configFile.exists()) {
