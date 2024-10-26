@@ -7,7 +7,7 @@ import me.timjuice.roidCore.config.CoreMessageConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
-public final class RoidCore extends JavaPlugin {
+public class RoidCore extends JavaPlugin {
     @Getter
     private static RoidCore instance;
     @Getter
