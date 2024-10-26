@@ -15,7 +15,7 @@ public class CoreMessageConfig {
     protected File configFile;
     protected FileConfiguration config;
 
-    private String messagePrefix;
+    private String pluginPrefix;
     private String helpMessageHeader;
     private String helpCategoryHeader;
     private String noPermissionMessage;
@@ -74,7 +74,7 @@ public class CoreMessageConfig {
     private void loadDefaultConfig() {
         ConfigLoader configLoader = new ConfigLoader(roidPlugin, new File(roidPlugin.getDataFolder(), "messages.yml"));
         // Load each configuration value with validation
-        messagePrefix = configLoader.getColoredString("message-prefix");
+        pluginPrefix = configLoader.getColoredString("message-prefix");
         helpMessageHeader = configLoader.getColoredString("help-message-header");
         helpCategoryHeader = configLoader.getColoredString("help-category-header");
         noPermissionMessage = configLoader.getColoredString("no-permission-message");
