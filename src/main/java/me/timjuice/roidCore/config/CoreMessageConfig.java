@@ -11,6 +11,7 @@ import java.io.IOException;
 @Getter
 public class CoreMessageConfig {
     protected final RoidCore roidPlugin;
+    protected File configFile;
     protected FileConfiguration config;
 
     private String helpMessageHeader;
@@ -31,7 +32,7 @@ public class CoreMessageConfig {
      * Generates the default configuration file if it does not exist.
      */
     private void generateDefaultConfig() {
-        File configFile = new File(roidPlugin.getDataFolder(), "messages.yml");
+        configFile = new File(roidPlugin.getDataFolder(), "messages.yml");
         if (!configFile.exists()) {
             try {
                 // Create the directory if it doesn't exist
