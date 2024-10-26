@@ -5,6 +5,8 @@ import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
+import static me.timjuice.roidCore.utils.FormatUtil.tc;
+
 @Getter
 public abstract class CommandArgument<T> {
     private final String name;
@@ -25,7 +27,7 @@ public abstract class CommandArgument<T> {
     public abstract String getErrorMessage(String input);
 
     protected String generateErrorMessage(String input, String expected) {
-        return String.format("&cInvalid argument '%s': '%s'. Expected: %s.", getName(), input, expected);
+        return tc(String.format("&cInvalid value for argument '%s'. Got: '%s'. Expected: %s.", getName(), input, expected));
     }
 
     // Optional: Abstract method for tab completion suggestions (if needed)

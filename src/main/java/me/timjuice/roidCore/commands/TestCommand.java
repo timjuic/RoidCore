@@ -14,6 +14,7 @@ public class TestCommand extends SubCommand {
                 .setDescription("Test command")
                 .setPlayerOnly(false)
                 .setCooldown(5)
+                .setGroup(DefaultCommandGroup.UTILITY.getName())
                 .addArgument(new StringArgument("dungeon", true, "dungeon1", "dungeon2", "dungeon3")) // Required string argument
                 .addArgument(new PlayerArgument("receiver", true)) // Optional integer argument
                 .addArgument(new IntegerArgument("amount", true))

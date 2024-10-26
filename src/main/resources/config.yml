@@ -3,3 +3,5 @@ help-category-header: "&8&m--------------&8[ &a&l{CATEGORY} &2&lHelp &8]&m------
 no-permission-message: "&cYou don't have permission to use this!"
 only-players-command: "&cOnly players can use this command!"
 invalid-command-message: "&cThat command doesn't exist! Type /{PLUGIN_NAME} for help."
+help-command-group-format: "&a/{BASE_CMD} help {CMD_GROUP} &f- &7Shows {CMD_GROUP} commands"
+help-individual-subcommand-format: "&a/{BASE_CMD} {SUB_CMD_NAME} &f- &7{SUB_CMD_DESCRIPTION}"

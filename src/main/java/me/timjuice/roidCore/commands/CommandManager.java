@@ -10,10 +10,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,11 +27,11 @@ public class CommandManager implements CommandExecutor, TabCompleter
     private String basePermission;
     private final String[] aliases;
     private final Map<UUID, Map<String, Long>> cooldowns = new HashMap<>();
-    private final Plugin plugin;
+    private final RoidCore roidPlugin;
     private final String baseDescription;
 
-    public CommandManager(Plugin plugin, String baseCmdName, String basePermission, String baseDescription, String[] aliases) {
-        this.plugin = plugin;
+    public CommandManager(RoidCore roidPlugin, String baseCmdName, String basePermission, String baseDescription, String[] aliases) {
+        this.roidPlugin = roidPlugin;
         this.baseCmdName = baseCmdName;
         this.basePermission = basePermission;
         this.baseDescription = baseDescription;
@@ -41,22 +39,22 @@ public class CommandManager implements CommandExecutor, TabCompleter
 
         this.registerCommand();
 
-        this.commandHelp = new HelpCommand(this);
+        this.commandHelp = new HelpCommand(roidPlugin, this);
         this.addCommand(this.commandHelp);
 
         // Set executor and tab completer
-        if (RoidCore.getInstance().getCommand(baseCmdName) != null) {
-            RoidCore.getInstance().getCommand(baseCmdName).setExecutor(this);
-            RoidCore.getInstance().getCommand(baseCmdName).setTabCompleter(this);
+        if (roidPlugin.getCommand(baseCmdName) != null) {
+            roidPlugin.getCommand(baseCmdName).setExecutor(this);
+            roidPlugin.getCommand(baseCmdName).setTabCompleter(this);
         }
     }
 
-    public CommandManager(Plugin plugin, String baseCmdName, String[] aliases) {
-        this(plugin, baseCmdName, "", "Base " + baseCmdName + " command", aliases);
+    public CommandManager(RoidCore roidPlugin, String baseCmdName, String[] aliases) {
+        this(roidPlugin, baseCmdName, "", "Base " + baseCmdName + " command", aliases);
     }
 
-    public CommandManager(Plugin plugin, String baseCmdName) {
-        this(plugin, baseCmdName, "", "Base " + baseCmdName + " command", null);
+    public CommandManager(RoidCore roidPlugin, String baseCmdName) {
+        this(roidPlugin, baseCmdName, "", "Base " + baseCmdName + " command", null);
     }
 
     public void registerCommand() {
@@ -77,7 +75,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
             };
 
             // Register the command
-            commandMap.register(plugin.getName(), baseCommand);
+            commandMap.register(roidPlugin.getName(), baseCommand);
         } catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -90,9 +88,9 @@ public class CommandManager implements CommandExecutor, TabCompleter
         // If no arguments are provided and the command is the base command
         if (args.length == 0 && command.getName().equalsIgnoreCase(this.getBaseCmdName())) {
             if (commandSender.hasPermission(commandHelp.getPermission()) || !commandHelp.requiresPermission()) {
-                commandHelp.execute(commandSender, new Arguments(plugin));
+                commandHelp.execute(commandSender, new Arguments(roidPlugin));
             } else {
-                commandSender.sendMessage(RoidCore.getInstance().getConf().getNoPermissionMessage());
+                commandSender.sendMessage(roidPlugin.getMessageConfig().getNoPermissionMessage());
             }
             return true;
         }
@@ -116,13 +114,13 @@ public class CommandManager implements CommandExecutor, TabCompleter
 
             // Handle player-only command
             if (subcommand.isPlayerOnly() && !(commandSender instanceof Player)) {
-                commandSender.sendMessage(RoidCore.getInstance().getConf().getOnlyPlayersCommandMessage());
+                commandSender.sendMessage(roidPlugin.getMessageConfig().getOnlyPlayersCommandMessage());
                 return true;
             }
 
             // Check permission
             if (subcommand.requiresPermission() && !commandSender.hasPermission(subcommand.getPermission()) && !commandSender.isOp()) {
-                commandSender.sendMessage(RoidCore.getInstance().getConf().getNoPermissionMessage());
+                commandSender.sendMessage(roidPlugin.getMessageConfig().getNoPermissionMessage());
                 return true;
             }
 
@@ -155,7 +153,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
         }
 
         // If the command entered isn't valid
-        commandSender.sendMessage(RoidCore.getInstance().getConf().getInvalidCommandMessage().replace("{PLUGIN_NAME}", plugin.getName()));
+        commandSender.sendMessage(roidPlugin.getMessageConfig().getInvalidCommandMessage().replace("{PLUGIN_NAME}", roidPlugin.getName()));
         return true;
     }
 
@@ -165,7 +163,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
 
         this.subCommands.put(subCommand.getClass().getName(), subCommand);
         if (subCommand.isRegisterDirectly()) {
-            RoidCore.getInstance().getCommand(subCommand.getName()).setExecutor(this);
+            roidPlugin.getCommand(subCommand.getName()).setExecutor(this);
         }
     }
 
@@ -257,7 +255,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
 
     private Arguments validateAndConvertArguments(SubCommand subcommand, String[] args, CommandSender sender) {
         List<CommandArgument<?>> subcommandArgs = subcommand.getArguments();
-        Arguments arguments = new Arguments(RoidCore.getInstance());
+        Arguments arguments = new Arguments(roidPlugin);
 
         StringBuilder infiniteStringBuilder = new StringBuilder();
 

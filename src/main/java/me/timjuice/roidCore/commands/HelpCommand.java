@@ -2,7 +2,7 @@ package me.timjuice.roidCore.commands;
 
 import me.timjuice.roidCore.RoidCore;
 import me.timjuice.roidCore.commands.arguments.Arguments;
-import org.bukkit.ChatColor;
+import me.timjuice.roidCore.commands.arguments.StringArgument;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -10,50 +10,84 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static me.timjuice.roidCore.utils.FormatUtil.tc;
+
 public class HelpCommand extends SubCommand {
     private final CommandManager baseCommand;
+    private final RoidCore roidPlugin;
 
-    public HelpCommand(CommandManager baseCommand) {
+    public HelpCommand(RoidCore roidPlugin, CommandManager baseCommand) {
 //        super("help", new String[]{}, "Help command", "", "", 0, false, false, "General");
         super(new SubCommand.Builder("help")
                 .setDescription("Help command")
+                .addArgument(new StringArgument("group", false))
         );
+        this.roidPlugin = roidPlugin;
         this.baseCommand = baseCommand;
     }
 
     @Override
     public void execute(CommandSender sender, Arguments args) {
         Map<String, List<SubCommand>> groupedCommands = new HashMap<>();
+        List<SubCommand> allowedCommands = new ArrayList<>();
+        boolean isGroupRequested = args.contains("group");
+        String requestedGroup;
 
-        // Group commands by their group attribute
+        // Group commands by their group attribute and filter by permission
         for (SubCommand command : baseCommand.getSubCommands()) {
             if (!sender.hasPermission(command.getPermission()) && !sender.isOp()) {
                 continue;
             }
+            allowedCommands.add(command);
             groupedCommands
                     .computeIfAbsent(command.getGroup(), k -> new ArrayList<>())
                     .add(command);
         }
 
-        // Build help message grouped by each group
-        List<String> helpMessageSummary = new ArrayList<>();
-        helpMessageSummary.add(RoidCore.getInstance().getConf().getHelpMessageHeader());
+        if (isGroupRequested) {
+            requestedGroup = args.get("group");
+            StringBuilder helpMsgBuilder = new StringBuilder();
+            helpMsgBuilder.append(RoidCore.getInstance().getMessageConfig().getHelpCategoryHeader()
+                    .replace("{CATEGORY}", requestedGroup))
+                    .append("\n");
 
-        for (Map.Entry<String, List<SubCommand>> entry : groupedCommands.entrySet()) {
-            String groupName = entry.getKey();
-            helpMessageSummary.add(ChatColor.BOLD + groupName + ":");
+            groupedCommands.get(requestedGroup).forEach((subCommand -> {
+                String message = roidPlugin.getMessageConfig().getHelpIndividualSubcommandFormat()
+                        .replace("{BASE_CMD}", baseCommand.getBaseCmdName())
+                        .replace("{SUB_CMD_NAME}", subCommand.getName())
+                        .replace("{SUB_CMD_DESCRIPTION}", subCommand.getDescription());
+                helpMsgBuilder.append(message).append("\n");
+            }));
 
-            for (SubCommand command : entry.getValue()) {
-                String message = ChatColor.translateAlternateColorCodes('&',
-                        String.format("&a/%s %s &f- &7%s", baseCommand.getBaseCmdName(), command.getName(), command.getDescription()));
-                helpMessageSummary.add(message);
+            sender.sendMessage(helpMsgBuilder.toString());
+            return;
+        }
+
+        // Build help message
+        StringBuilder helpMsgBuilder = new StringBuilder();
+        helpMsgBuilder.append(RoidCore.getInstance().getMessageConfig().getHelpMessageHeader()
+                .replace("{PLUGIN_NAME}", roidPlugin.getName()))
+                .append("\n");
+
+        if (allowedCommands.size() > 10) {
+            // Display group help commands
+            for (String groupName : groupedCommands.keySet()) {
+                helpMsgBuilder.append(roidPlugin.getMessageConfig().getHelpCommandGroupFormat()
+                        .replace("{BASE_CMD}", baseCommand.getBaseCmdName())
+                        .replace("{CMD_GROUP}", groupName)
+                        .replace("{CMD_GROUP}", groupName)).append("\n");
             }
-            helpMessageSummary.add("");  // Blank line between groups
+        } else {
+            // Display all subcommands individually
+            for (SubCommand command : allowedCommands) {
+                String message = roidPlugin.getMessageConfig().getHelpIndividualSubcommandFormat()
+                        .replace("{BASE_CMD}", baseCommand.getBaseCmdName())
+                        .replace("{SUB_CMD_NAME}", command.getName())
+                        .replace("{SUB_CMD_DESCRIPTION}", command.getDescription());
+                helpMsgBuilder.append(message).append("\n");
+            }
         }
 
-        // Send the messages to the command sender
-        for (String message : helpMessageSummary) {
-            sender.sendMessage(message);
-        }
+        sender.sendMessage(helpMsgBuilder.toString());
     }
 }
