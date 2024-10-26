@@ -26,6 +26,8 @@ public class CoreMessageConfig {
 
     public CoreMessageConfig(RoidCore roidPlugin) {
         this.roidPlugin = roidPlugin;
+        configFile = new File(roidPlugin.getDataFolder(), "messages.yml");
+        config = YamlConfiguration.loadConfiguration(configFile);
         generateDefaultConfig();  // Generate default configuration if not exists
         loadDefaultConfig();  // Load the configuration
     }
@@ -34,8 +36,6 @@ public class CoreMessageConfig {
      * Generates the default configuration file if it does not exist.
      */
     private void generateDefaultConfig() {
-        configFile = new File(roidPlugin.getDataFolder(), "messages.yml");
-        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
         // Add default values
         config.addDefault("message-prefix", "&f&lRoidCore &8» ");
