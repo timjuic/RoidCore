@@ -102,8 +102,8 @@ public class CommandManager implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String string, String[] args) {
-        boolean isDirectExecute = !isBaseCommand(string) && subCommandExists(string);
+    public boolean onCommand(CommandSender commandSender, Command command, String alias, String[] args) {
+        boolean isDirectExecute = !isBaseCommand(alias) && subCommandExists(alias);
 
         // If no arguments are provided and the command is the base command
         if (args.length == 0 && command.getName().equalsIgnoreCase(this.getBaseCmdName())) {
@@ -121,7 +121,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             int argsOffset = 1;
             if (isDirectExecute) {
                 // If the command is directly executed, check against subcommand name and aliases
-                if (!string.equalsIgnoreCase(subcommand.getName()) && !subcommand.getAliases().contains(string.toLowerCase())) {
+                if (!alias.equalsIgnoreCase(subcommand.getName()) && !subcommand.getAliases().contains(alias.toLowerCase())) {
                     continue;
                 }
                 argsOffset = 0; // No need to shift arguments when directly executing
@@ -146,7 +146,13 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
             // Check argument count
             if ((args.length - argsOffset) < subcommand.getMinArgs()) {
-                commandSender.sendMessage(ChatColor.RED + "Not enough args! Use: " + ChatColor.DARK_RED + String.format("/%s %s %s", getBaseCmdName(), subcommand.getName(), subcommand.getUsage()));
+                boolean baseCommandUsed = isBaseCommand(alias);
+                if (baseCommandUsed) { // If player executed the subcommand through the base command
+                    commandSender.sendMessage(ChatColor.RED + "Not enough args! Use: " + ChatColor.DARK_RED + String.format("/%s %s %s", alias, args[0], subcommand.getUsage()));
+                } else { // If player ran the subcommand directly (for registerDirectly commands)
+                    commandSender.sendMessage(ChatColor.RED + "Not enough args! Use: " + ChatColor.DARK_RED + String.format("/%s %s", alias, subcommand.getUsage()));
+                }
+
                 return true;
             }
 
