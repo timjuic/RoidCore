@@ -17,8 +17,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CommandManager implements CommandExecutor, TabCompleter
-{
+public class CommandManager implements CommandExecutor, TabCompleter {
     private final LinkedHashMap<String, SubCommand> subCommands = new LinkedHashMap<>();
     private final HelpCommand commandHelp;
     @Getter
@@ -63,7 +62,7 @@ public class CommandManager implements CommandExecutor, TabCompleter
             Field f = Bukkit.getServer().getClass().getDeclaredField("commandMap");
             f.setAccessible(true);
             CommandMap commandMap = (CommandMap) f.get(Bukkit.getServer());
-            Command baseCommand = new Command(baseCmdName, "Base command description", "/" + baseCmdName, List.of(aliases)) {
+            Command baseCommand = new Command(baseCmdName, baseDescription, "/" + baseCmdName, List.of(aliases)) {
                 @Override
                 public boolean execute(CommandSender sender, String label, String[] args) {
                     return onCommand(sender, this, label, args);  // Delegate to CommandManager's onCommand
@@ -88,11 +87,12 @@ public class CommandManager implements CommandExecutor, TabCompleter
             f.setAccessible(true);
             CommandMap commandMap = (CommandMap) f.get(Bukkit.getServer());
 
-            commandMap.clearCommands();
+            commandMap.getCommand(baseCmdName).unregister(commandMap);
             for (SubCommand subCommand : subCommands.values()) {
                 PluginCommand command = roidPlugin.getCommand(subCommand.getName());
                 if (command != null) {
                     command.setExecutor(null);
+                    command.unregister(commandMap);
                 }
             }
             subCommands.clear();
@@ -187,12 +187,24 @@ public class CommandManager implements CommandExecutor, TabCompleter
         }
     }
 
-    public Collection<SubCommand> getSubCommands()
-    {
+    public Collection<SubCommand> getSubCommands() {
         return Collections.unmodifiableCollection(subCommands.values());
     }
-    public SubCommand getSubCommand(String subcommandName) {
+
+    public SubCommand getSubCommandExact(String subcommandName) {
         return subCommands.get(subcommandName);
+    }
+
+    public SubCommand getSubCommand(String searchName) {
+        for (SubCommand subcommand : subCommands.values()) {
+            if (subcommand.getName().equalsIgnoreCase(searchName)) {
+                return subcommand;
+            }
+            if (subcommand.getAliases().contains(searchName.toLowerCase())) {
+                return subcommand;
+            }
+        }
+        return null;
     }
 
     public Boolean subCommandExists(String searchName) {
@@ -202,15 +214,30 @@ public class CommandManager implements CommandExecutor, TabCompleter
         }
         return false;
     }
+
+
     public Boolean isBaseCommand(String command) {
         return Arrays.stream(this.aliases).anyMatch(baseAlias -> baseAlias.equalsIgnoreCase(command)) || command.equalsIgnoreCase(this.getBaseCmdName());
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        Bukkit.broadcastMessage("Tab complete called " + alias + " " + Arrays.toString(args));
         // Check if the sender has permission for the base command
         if (!(sender.hasPermission(basePermission) || sender.isOp())) {
             return Collections.emptyList(); // Return no suggestions if base permission is not present
+        }
+
+        // Allow tabcomplete if subcommand directly used without manager prefix
+        SubCommand subcommand = getSubCommand(alias);
+        if (subcommand != null) {
+            // Check if sender has permission to use this subcommand
+            if (subcommand.requiresPermission() && !(sender.hasPermission(subcommand.getPermission()) || sender.isOp())) {
+                return Collections.emptyList(); // No suggestions if permission is missing
+            }
+
+            // Pass remaining args to the subcommand for its specific tab completion logic
+            return subcommand.onTabComplete(sender, Arrays.copyOfRange(args, 0, args.length));
         }
 
         if (args.length == 0) {
@@ -218,9 +245,9 @@ public class CommandManager implements CommandExecutor, TabCompleter
         }
 
         // Handle subcommand tab completion
-        SubCommand subcommand = subCommands.values().stream()
-                .filter(cmd -> cmd.getName().equalsIgnoreCase(args[0]) || cmd.getAliases().contains(args[0].toLowerCase()))
-                .findFirst().orElse(null);
+        subcommand = subCommands.values().stream()
+            .filter(cmd -> cmd.getName().equalsIgnoreCase(args[0]) || cmd.getAliases().contains(args[0].toLowerCase()))
+            .findFirst().orElse(null);
 
         if (subcommand != null) {
             // Check if sender has permission to use this subcommand
@@ -235,10 +262,10 @@ public class CommandManager implements CommandExecutor, TabCompleter
         // Provide list of subcommands for the first argument, considering permissions
         if (args.length == 1) {
             return subCommands.values().stream()
-                    .filter(cmd -> !cmd.requiresPermission() || sender.hasPermission(cmd.getPermission()) || sender.isOp()) // Filter by permissions
-                    .map(SubCommand::getName)
-                    .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
-                    .collect(Collectors.toList());
+                .filter(cmd -> !cmd.requiresPermission() || sender.hasPermission(cmd.getPermission()) || sender.isOp()) // Filter by permissions
+                .map(SubCommand::getName)
+                .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                .collect(Collectors.toList());
         }
 
         return Collections.emptyList();
@@ -276,28 +303,33 @@ public class CommandManager implements CommandExecutor, TabCompleter
     private Arguments validateAndConvertArguments(SubCommand subcommand, String[] args, CommandSender sender) {
         List<CommandArgument<?>> subcommandArgs = subcommand.getArguments();
         Arguments arguments = new Arguments(roidPlugin);
+        Bukkit.broadcastMessage("got args " + Arrays.toString(args));
 
         StringBuilder infiniteStringBuilder = new StringBuilder();
-        String[] nonFlagArgs = args;
 
+        // Create a list of non-flag arguments while processing flags
+        List<String> nonFlagArgsList = new ArrayList<>();
+
+        // First pass: process flags and collect non-flag arguments
+        for (String arg : args) {
+            if (arg.startsWith("-") && subcommand.getFlags().containsKey(arg)) {
+                Bukkit.broadcastMessage("Processing flag: " + arg);
+                arguments.setFlag(arg);
+            } else {
+                nonFlagArgsList.add(arg);
+            }
+        }
+
+        // Convert list back to array for further processing
+        String[] nonFlagArgs = nonFlagArgsList.toArray(new String[0]);
+
+        // Second pass: process regular arguments
         for (int i = 0; i < nonFlagArgs.length; i++) {
             String arg = nonFlagArgs[i];
 
-            // Check for flags
-            if (arg.startsWith("-")) {
-                if (subcommand.getFlags().containsKey(arg)) {
-                    arguments.setFlag(arg);
-                    if (i == 0 && nonFlagArgs.length > 1) {
-                        nonFlagArgs = Arrays.copyOfRange(nonFlagArgs, 1, nonFlagArgs.length);
-                        i = -1; // Reset index to start from the beginning of the new array
-                    }
-                    continue;
-                }
-            }
-
-            // Process regular arguments
             if (i < subcommandArgs.size()) {
                 CommandArgument<?> commandArg = subcommandArgs.get(i);
+                Bukkit.broadcastMessage("Processing arg: " + commandArg.getName() + " with " + arg);
 
                 if (!commandArg.isValid(arg)) {
                     sender.sendMessage(commandArg.getErrorMessage(arg));
@@ -309,8 +341,6 @@ public class CommandManager implements CommandExecutor, TabCompleter
                     infiniteStringBuilder.append(String.join(" ", remainingArgs));
                     Object convertedValue = commandArg.convert(infiniteStringBuilder.toString());
                     arguments.put(commandArg.getName(), convertedValue);
-                    // Skipped breaking, to allow flags at the end
-//                    break; // Stop processing further arguments as InfiniteStringArgument consumes the rest
                 } else {
                     Object convertedValue = commandArg.convert(arg);
                     arguments.put(commandArg.getName(), convertedValue);
