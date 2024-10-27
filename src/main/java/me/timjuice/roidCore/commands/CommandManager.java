@@ -222,7 +222,6 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        Bukkit.broadcastMessage("Tab complete called " + alias + " " + Arrays.toString(args));
         // Check if the sender has permission for the base command
         if (!(sender.hasPermission(basePermission) || sender.isOp())) {
             return Collections.emptyList(); // Return no suggestions if base permission is not present
@@ -303,7 +302,6 @@ public class CommandManager implements CommandExecutor, TabCompleter {
     private Arguments validateAndConvertArguments(SubCommand subcommand, String[] args, CommandSender sender) {
         List<CommandArgument<?>> subcommandArgs = subcommand.getArguments();
         Arguments arguments = new Arguments(roidPlugin);
-        Bukkit.broadcastMessage("got args " + Arrays.toString(args));
 
         StringBuilder infiniteStringBuilder = new StringBuilder();
 
@@ -313,7 +311,6 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         // First pass: process flags and collect non-flag arguments
         for (String arg : args) {
             if (arg.startsWith("-") && subcommand.getFlags().containsKey(arg)) {
-                Bukkit.broadcastMessage("Processing flag: " + arg);
                 arguments.setFlag(arg);
             } else {
                 nonFlagArgsList.add(arg);
@@ -329,7 +326,6 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
             if (i < subcommandArgs.size()) {
                 CommandArgument<?> commandArg = subcommandArgs.get(i);
-                Bukkit.broadcastMessage("Processing arg: " + commandArg.getName() + " with " + arg);
 
                 if (!commandArg.isValid(arg)) {
                     sender.sendMessage(commandArg.getErrorMessage(arg));
