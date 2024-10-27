@@ -12,6 +12,10 @@ public class PositiveIntegerArgument extends IntegerArgument {
         super(name, required);
     }
 
+    public PositiveIntegerArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         try {

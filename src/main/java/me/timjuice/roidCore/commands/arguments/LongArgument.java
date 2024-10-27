@@ -11,6 +11,10 @@ public class LongArgument extends CommandArgument<Long> {
         super(name, required);
     }
 
+    public LongArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         try {

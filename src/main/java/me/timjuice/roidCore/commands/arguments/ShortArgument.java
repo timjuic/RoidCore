@@ -9,6 +9,10 @@ public class ShortArgument extends CommandArgument<Short> {
         super(name, required);
     }
 
+    public ShortArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         try {

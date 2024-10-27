@@ -12,6 +12,10 @@ public class BooleanArgument extends CommandArgument<Boolean> {
         super(name, required);
     }
 
+    public BooleanArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         // Check if input matches true/false or yes/no (case insensitive)

@@ -12,15 +12,23 @@ public class TimeArgument extends CommandArgument<Long> {
     // Regex to match time inputs with multiple units (e.g., "10d12h5s" or "5y40d")
     private static final Pattern TIME_PATTERN = Pattern.compile("(\\d+\\s*[smhd]|\\d+\\s*seconds?|\\d+\\s*minutes?|\\d+\\s*hours?|\\d+\\s*days?|\\d+\\s*months?|\\d+\\s*years?|\\d+\\s*y|\\d+\\s*mo)+");
 
-    private final List<String> suggestions; // List to hold custom suggestions
+    private final List<String> suggestions;
 
-    // Constructor with custom suggestions
     public TimeArgument(String name, boolean required, List<String> suggestions) {
         super(name, required);
-        this.suggestions = suggestions != null ? suggestions : Collections.emptyList(); // Use provided suggestions or empty list
+        this.suggestions = suggestions != null ? suggestions : Collections.emptyList();
     }
 
-    // Overloaded constructor without suggestions (uses an empty list by default)
+    public TimeArgument(String name, List<String> suggestions) {
+        super(name);
+        this.suggestions = suggestions != null ? suggestions : Collections.emptyList();
+    }
+
+    public TimeArgument(String name) {
+        super(name);
+        this.suggestions = Collections.emptyList();
+    }
+
     public TimeArgument(String name, boolean required) {
         this(name, required, Collections.emptyList());
     }

@@ -16,6 +16,10 @@ public class OfflinePlayerArgument extends CommandArgument<OfflinePlayer> {
         super(name, required);
     }
 
+    public OfflinePlayerArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(input);

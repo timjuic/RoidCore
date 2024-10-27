@@ -11,6 +11,10 @@ public class IntegerArgument extends CommandArgument<Integer> {
         super(name, required);
     }
 
+    public IntegerArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         try {

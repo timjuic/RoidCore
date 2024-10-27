@@ -10,12 +10,16 @@ import java.util.stream.Collectors;
 import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
 public class StringArgument extends CommandArgument<String> {
-    private final List<String> options; // Predefined options for this argument type
+    private final List<String> options;
 
-    // Constructor accepting a name and optional options
     public StringArgument(String name, boolean required, String... options) {
         super(name, required);
-        this.options = options.length > 0 ? Arrays.asList(options) : Collections.emptyList(); // Store options if provided, otherwise empty
+        this.options = options.length > 0 ? Arrays.asList(options) : Collections.emptyList();
+    }
+
+    public StringArgument(String name, String... options) {
+        super(name);
+        this.options = options.length > 0 ? Arrays.asList(options) : Collections.emptyList();
     }
 
     @Override

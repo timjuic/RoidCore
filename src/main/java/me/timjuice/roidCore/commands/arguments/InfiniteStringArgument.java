@@ -11,6 +11,10 @@ public class InfiniteStringArgument extends CommandArgument<String> {
         super(name, required);
     }
 
+    public InfiniteStringArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         return !input.trim().isEmpty(); // Accepts any non-empty string

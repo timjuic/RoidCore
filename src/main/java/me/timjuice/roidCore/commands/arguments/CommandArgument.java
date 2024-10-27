@@ -14,7 +14,12 @@ public abstract class CommandArgument<T> {
 
     public CommandArgument(String name, boolean required) {
         this.name = name;
-        this.required = required; // Set the required attribute
+        this.required = required;
+    }
+
+    public CommandArgument(String name) {
+        this.name = name;
+        this.required = true;
     }
 
     // Abstract method to validate the argument

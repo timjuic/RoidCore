@@ -16,6 +16,10 @@ public class CombinedPlayerArgument extends CommandArgument<RoidPlayer> {
         super(name, required);
     }
 
+    public CombinedPlayerArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(input);

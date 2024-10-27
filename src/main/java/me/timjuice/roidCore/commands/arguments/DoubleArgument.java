@@ -14,6 +14,10 @@ public class DoubleArgument extends CommandArgument<Double> {
         super(name, required);
     }
 
+    public DoubleArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         try {

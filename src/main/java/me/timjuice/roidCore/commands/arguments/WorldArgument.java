@@ -13,6 +13,10 @@ public class WorldArgument extends CommandArgument<World> {
         super(name, required);
     }
 
+    public WorldArgument(String name) {
+        super(name);
+    }
+
     @Override
     public boolean isValid(String input) {
         return Bukkit.getWorld(input) != null;
@@ -20,7 +24,7 @@ public class WorldArgument extends CommandArgument<World> {
 
     @Override
     public World convert(String input) {
-        return Bukkit.getWorld(input); // Returns the World object
+        return Bukkit.getWorld(input);
     }
 
     @Override
