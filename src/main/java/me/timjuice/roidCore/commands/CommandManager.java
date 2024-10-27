@@ -259,7 +259,6 @@ public class CommandManager implements CommandExecutor, TabCompleter
         Arguments arguments = new Arguments(roidPlugin);
 
         StringBuilder infiniteStringBuilder = new StringBuilder();
-        Bukkit.broadcastMessage(Arrays.toString(args));
         String[] nonFlagArgs = args;
 
         for (int i = 0; i < nonFlagArgs.length; i++) {

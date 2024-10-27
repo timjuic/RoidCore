@@ -33,9 +33,9 @@ public class TestCommand extends SubCommand {
 
         if (args.has("description")) {
             String[] description = args.get("description");
-            Bukkit.broadcastMessage(dungeon + " " + receiver.getName() + " " + amount + " " + String.join(" ", description) + " " + hasFlag);
+            sender.sendMessage(dungeon + " " + receiver.getName() + " " + amount + " " + String.join(" ", description) + " " + hasFlag);
         } else {
-            Bukkit.broadcastMessage(dungeon + " " + receiver.getName() + " " + amount + " " + hasFlag);
+            sender.sendMessage(dungeon + " " + receiver.getName() + " " + amount + " " + hasFlag);
         }
     }
 }
