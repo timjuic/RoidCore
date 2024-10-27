@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
+import static me.timjuice.roidCore.utils.FormatUtil.tc;
+
 public class CombinedPlayerArgument extends CommandArgument<RoidPlayer> {
     public CombinedPlayerArgument(String name, boolean required) {
         super(name, required);
@@ -28,7 +30,7 @@ public class CombinedPlayerArgument extends CommandArgument<RoidPlayer> {
 
     @Override
     public String getErrorMessage(String input) {
-        return String.format("Invalid argument '%s'. Player '%s' was not found or has never played before!", this.getName(), input);
+        return tc( String.format("Invalid argument '%s'. Player '%s' was not found or has never played before!", this.getName(), input));
     }
 
     @Override
