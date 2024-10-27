@@ -6,6 +6,7 @@ import me.timjuice.roidCore.RoidCore;
 import me.timjuice.roidCore.commands.arguments.Arguments;
 import me.timjuice.roidCore.commands.arguments.CommandArgument;
 import me.timjuice.roidCore.commands.arguments.InfiniteStringArgument;
+import me.timjuice.roidCore.utils.ConsoleLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.*;
@@ -158,7 +159,8 @@ public class CommandManager implements CommandExecutor, TabCompleter
     }
 
     public void addCommand(SubCommand subCommand) {
-        validateSubCommand(subCommand);
+        boolean commandValid = isSubCommandValid(subCommand);
+        if (!commandValid) return;
 
         this.subCommands.put(subCommand.getClass().getName(), subCommand);
         if (subCommand.isRegisterDirectly()) {
@@ -271,7 +273,6 @@ public class CommandManager implements CommandExecutor, TabCompleter
                         nonFlagArgs = Arrays.copyOfRange(nonFlagArgs, 1, nonFlagArgs.length);
                         i = -1; // Reset index to start from the beginning of the new array
                     }
-                    // SHIFT FIRST ARGUMENT so it doesnt mess up the next real argument
                     continue;
                 }
             }
@@ -303,11 +304,26 @@ public class CommandManager implements CommandExecutor, TabCompleter
     }
 
 
-    private void validateSubCommand(SubCommand subCommand) {
+    private boolean isSubCommandValid(SubCommand subCommand) {
         List<CommandArgument<?>> arguments = subCommand.getArguments();
 
         boolean hasOptionalArg = false;
-        boolean hasInfiniteStringArg = false;
+
+        // Check if the subcommand name or any of its aliases already exist
+        if (subCommandExists(subCommand.getName())) {
+            ConsoleLogger.error(roidPlugin, String.format(
+                "Subcommand name '%s' already exists. Skipping command '%s'",
+                subCommand.getName(), subCommand.getName()));
+            return false;
+        }
+        for (String alias : subCommand.getAliases()) {
+            if (subCommandExists(alias)) {
+                ConsoleLogger.error(roidPlugin, String.format(
+                    "Subcommand alias '%s' already exists.",
+                    alias));
+                return false;
+            }
+        }
 
         for (int i = 0; i < arguments.size(); i++) {
             CommandArgument<?> arg = arguments.get(i);
@@ -317,28 +333,24 @@ public class CommandManager implements CommandExecutor, TabCompleter
                 hasOptionalArg = true;
             } else if (hasOptionalArg) {
                 // A required argument comes after an optional argument
-                throw new IllegalArgumentException("Required argument '" + arg.getName() + "' cannot follow optional arguments in subcommand '" + subCommand.getName() + "'.");
+                ConsoleLogger.error(roidPlugin, String.format(
+                    "Required argument '%s' cannot follow optional arguments in subcommand '%s'.",
+                    arg.getName(), subCommand.getName()));
+                return false;
             }
 
             // Check if the argument is an infinite string argument
             if (arg instanceof InfiniteStringArgument) {
-                hasInfiniteStringArg = true;
-
                 // Ensure it is the last argument
                 if (i < arguments.size() - 1) {
-                    throw new IllegalArgumentException("Infinite string argument must be the last argument in subcommand '" + subCommand.getName() + "'.");
+                    ConsoleLogger.error(roidPlugin, String.format(
+                        "Infinite string argument must be the last argument in subcommand '%s'.",
+                        subCommand.getName()));
+                    return false;
                 }
             }
         }
 
-        // Check if the subcommand name or any of its aliases already exist
-        if (subCommandExists(subCommand.getName())) {
-            throw new IllegalArgumentException("Subcommand name '" + subCommand.getName() + "' already exists.");
-        }
-        for (String alias : subCommand.getAliases()) {
-            if (subCommandExists(alias)) {
-                throw new IllegalArgumentException("Subcommand alias '" + alias + "' already exists.");
-            }
-        }
+        return true;
     }
 }
