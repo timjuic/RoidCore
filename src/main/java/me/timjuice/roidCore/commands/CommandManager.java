@@ -82,6 +82,25 @@ public class CommandManager implements CommandExecutor, TabCompleter
         }
     }
 
+    public void clearCommands() {
+        try {
+            Field f = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            f.setAccessible(true);
+            CommandMap commandMap = (CommandMap) f.get(Bukkit.getServer());
+
+            commandMap.clearCommands();
+            for (SubCommand subCommand : subCommands.values()) {
+                PluginCommand command = roidPlugin.getCommand(subCommand.getName());
+                if (command != null) {
+                    command.setExecutor(null);
+                }
+            }
+            subCommands.clear();
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String string, String[] args) {
         boolean isDirectExecute = !isBaseCommand(string) && subCommandExists(string);
