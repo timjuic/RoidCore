@@ -38,7 +38,7 @@ public class WorldArgument extends CommandArgument<World> {
     }
 
     @Override
-    public List<String> getSuggestions(CommandSender sender, String currentInput) {
+    public List<String> getCustomSuggestions(CommandSender sender, String currentInput) {
         // List all worlds that match the current input
         return Bukkit.getWorlds().stream()
                 .map(World::getName)

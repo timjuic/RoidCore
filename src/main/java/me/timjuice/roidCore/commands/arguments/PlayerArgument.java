@@ -39,7 +39,7 @@ public class PlayerArgument extends CommandArgument<Player> {
     }
 
     @Override
-    public List<String> getSuggestions(CommandSender sender, String currentInput) {
+    public List<String> getCustomSuggestions(CommandSender sender, String currentInput) {
         return Bukkit.getOnlinePlayers().stream()
                 .map(Player::getName)
                 .filter(name -> name.toLowerCase().startsWith(currentInput.toLowerCase()))

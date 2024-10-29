@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BooleanArgument extends CommandArgument<Boolean> {
 
@@ -40,9 +41,9 @@ public class BooleanArgument extends CommandArgument<Boolean> {
     }
 
     @Override
-    public List<String> getSuggestions(CommandSender sender, String currentInput) {
+    public List<String> getCustomSuggestions(CommandSender sender, String currentInput) {
         // Suggest "true", "false", "yes", and "no" that match the current input
-        return Arrays.asList("true", "false", "yes", "no").stream()
+        return Stream.of("true", "false", "yes", "no")
                 .filter(option -> option.toLowerCase().startsWith(currentInput.toLowerCase()))
                 .collect(Collectors.toList());
     }
