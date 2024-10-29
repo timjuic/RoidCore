@@ -12,7 +12,12 @@ public class LongArgument extends CommandArgument<Long> {
     }
 
     public static CommandArgumentBuilder<Long> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public LongArgument build() {
+                return new LongArgument(this);
+            }
+        };
     }
 
     @Override
@@ -33,10 +38,5 @@ public class LongArgument extends CommandArgument<Long> {
     @Override
     public String getErrorMessage(String input) {
         return tc(String.format("&cInvalid long input: '%s'", input));
-    }
-
-    @Override
-    public List<String> getSuggestions(CommandSender sender, String currentInput) {
-        return List.of(); // No specific suggestions for longs
     }
 }

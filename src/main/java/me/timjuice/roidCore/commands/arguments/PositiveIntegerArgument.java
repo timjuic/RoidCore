@@ -11,6 +11,15 @@ public class PositiveIntegerArgument extends IntegerArgument {
         super(builder);
     }
 
+    public static CommandArgumentBuilder<Integer> builder(String name) {
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public PositiveIntegerArgument build() {
+                return new PositiveIntegerArgument(this);
+            }
+        };
+    }
+
     @Override
     public boolean isTypeValid(String input) {
         try {
@@ -24,10 +33,5 @@ public class PositiveIntegerArgument extends IntegerArgument {
     @Override
     public String getErrorMessage(String input) {
         return tc(String.format("&cInvalid positive integer input: '%s'. Must be a positive integer.", input));
-    }
-
-    @Override
-    public List<String> getSuggestions(CommandSender sender, String currentInput) {
-        return List.of();
     }
 }

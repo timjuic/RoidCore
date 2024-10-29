@@ -5,6 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 
 public class TestCommand extends SubCommand {
     public TestCommand() {
@@ -15,11 +17,11 @@ public class TestCommand extends SubCommand {
                 .setPlayerOnly(false)
                 .setCooldown(5)
                 .setGroup(DefaultCommandGroup.UTILITY.getName())
-                .addArgument(new StringArgument("dungeon", true, "dungeon1", "dungeon2", "dungeon3")) // Required string argument
-                .addArgument(new PlayerArgument("receiver", true)) // Optional integer argument
-                .addArgument(new IntegerArgument("amount", true))
-                .addArgument(new BooleanArgument("enabled", true))
-                .addArgument(new InfiniteStringArgument("description", false))
+                .addArgument(StringArgument.builder("dungeon").setValidOptions(() -> List.of("dungeon1", "dungeon2")).build())
+                .addArgument(PlayerArgument.builder("player").setSuggestedOptions(() -> List.of("timjuice")).build())
+                .addArgument(IntegerArgument.builder("amount").setSuggestedOptions(() -> List.of("1", "2", "3", "10")).build())
+                .addArgument(BooleanArgument.builder("enabled").build())
+                .addArgument(InfiniteStringArgument.builder("description").build())
                 .addFlag("-s")
         );
     }
@@ -27,13 +29,13 @@ public class TestCommand extends SubCommand {
     @Override
     public void execute(CommandSender sender, Arguments args) {
         String dungeon = args.get("dungeon");
-        Player receiver = args.get("receiver");
+        Player receiver = args.get("player");
         int amount = args.get("amount");
         boolean hasFlag = args.hasFlag("-s");
 
         if (args.has("description")) {
-            String[] description = args.get("description");
-            sender.sendMessage(dungeon + " " + receiver.getName() + " " + amount + " " + String.join(" ", description) + " " + hasFlag);
+            String description = args.get("description");
+            sender.sendMessage(dungeon + " " + receiver.getName() + " " + amount + " " + description + " " + hasFlag);
         } else {
             sender.sendMessage(dungeon + " " + receiver.getName() + " " + amount + " " + hasFlag);
         }

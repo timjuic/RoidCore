@@ -34,13 +34,13 @@ public abstract class CommandArgument<T> {
         return suggestedOptionsSupplier != null ? suggestedOptionsSupplier.get() : Collections.emptyList();
     }
 
-    public static class CommandArgumentBuilder<T> {
+    public abstract static class CommandArgumentBuilder<T> {
         private final String name;
         private boolean required = true;
         private Supplier<List<String>> validOptionsSupplier = Collections::emptyList;
         private Supplier<List<String>> suggestedOptionsSupplier = Collections::emptyList;
 
-        public CommandArgumentBuilder(String name) {
+        protected CommandArgumentBuilder(String name) {
             this.name = name;
         }
 
@@ -58,14 +58,17 @@ public abstract class CommandArgument<T> {
             this.suggestedOptionsSupplier = optionsSupplier;
             return this;
         }
+
+        // Abstract method to build the specific CommandArgument instance
+        public abstract CommandArgument<T> build();
     }
 
     public boolean isValid(String input) {
         List<String> validOptions = getValidOptions();
         if (validOptions.isEmpty()) {
-            return true;
+            return isTypeValid(input);
         }
-        return validOptions.contains(input);
+        return validOptions.contains(input) && isTypeValid(input);
     }
 
     protected abstract boolean isTypeValid(String input);

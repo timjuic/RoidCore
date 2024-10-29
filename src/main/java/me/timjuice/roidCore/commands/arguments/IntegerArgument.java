@@ -10,7 +10,12 @@ public class IntegerArgument extends CommandArgument<Integer> {
     }
 
     public static CommandArgumentBuilder<Integer> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public IntegerArgument build() {
+                return new IntegerArgument(this);
+            }
+        };
     }
 
     @Override
@@ -31,10 +36,5 @@ public class IntegerArgument extends CommandArgument<Integer> {
     @Override
     public String getErrorMessage(String input) {
         return generateErrorMessage(input, "A positive number value (e.g., 10, 25).");
-    }
-
-    @Override
-    public List<String> getSuggestions(CommandSender sender, String currentInput) {
-        return List.of();
     }
 }

@@ -12,7 +12,12 @@ public class InfiniteStringArgument extends CommandArgument<String> {
     }
 
     public static CommandArgumentBuilder<String> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public InfiniteStringArgument build() {
+                return new InfiniteStringArgument(this);
+            }
+        };
     }
 
     @Override
@@ -28,10 +33,5 @@ public class InfiniteStringArgument extends CommandArgument<String> {
     @Override
     public String getErrorMessage(String input) {
         return tc(String.format("&cInvalid input for infinite argument: '%s'", input));
-    }
-
-    @Override
-    public List<String> getSuggestions(CommandSender sender, String currentInput) {
-        return List.of(); // No specific suggestions for infinite strings
     }
 }

@@ -10,7 +10,12 @@ public class DoubleArgument extends CommandArgument<Double> {
     }
 
     public static CommandArgumentBuilder<Double> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public DoubleArgument build() {
+                return new DoubleArgument(this);
+            }
+        };
     }
 
     @Override
@@ -31,10 +36,5 @@ public class DoubleArgument extends CommandArgument<Double> {
     @Override
     public String getErrorMessage(String input) {
         return generateErrorMessage(input, "A valid double value (e.g., 10.5)");
-    }
-
-    @Override
-    public List<String> getSuggestions(CommandSender sender, String currentInput) {
-        return List.of(); // No specific suggestions for longs
     }
 }

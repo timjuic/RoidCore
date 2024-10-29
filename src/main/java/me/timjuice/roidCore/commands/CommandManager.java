@@ -221,6 +221,14 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         return false;
     }
 
+    public List<String> getUsedCommandGroups() {
+        List<String> commandGroup = new ArrayList<>();
+        for (SubCommand subcommand : subCommands.values()) {
+            if (commandGroup.contains(subcommand.getGroup())) continue;
+            commandGroup.add(subcommand.getName());
+        }
+        return commandGroup;
+    }
 
     public Boolean isBaseCommand(String command) {
         return Arrays.stream(this.aliases).anyMatch(baseAlias -> baseAlias.equalsIgnoreCase(command)) || command.equalsIgnoreCase(this.getBaseCmdName());

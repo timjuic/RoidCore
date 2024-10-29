@@ -16,7 +16,12 @@ public class OfflinePlayerArgument extends CommandArgument<OfflinePlayer> {
     }
 
     public static CommandArgumentBuilder<OfflinePlayer> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public OfflinePlayerArgument build() {
+                return new OfflinePlayerArgument(this);
+            }
+        };
     }
 
     @Override

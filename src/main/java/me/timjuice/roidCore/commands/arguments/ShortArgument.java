@@ -10,7 +10,12 @@ public class ShortArgument extends CommandArgument<Short> {
     }
 
     public static CommandArgumentBuilder<Short> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public ShortArgument build() {
+                return new ShortArgument(this);
+            }
+        };
     }
 
     @Override
@@ -31,10 +36,5 @@ public class ShortArgument extends CommandArgument<Short> {
     @Override
     public String getErrorMessage(String input) {
         return generateErrorMessage(input, "A short number value (e.g., 5, 20).");
-    }
-
-    @Override
-    public List<String> getSuggestions(CommandSender sender, String currentInput) {
-        return List.of();
     }
 }

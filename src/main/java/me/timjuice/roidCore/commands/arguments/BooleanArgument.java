@@ -13,7 +13,12 @@ public class BooleanArgument extends CommandArgument<Boolean> {
     }
 
     public static CommandArgumentBuilder<Boolean> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<Boolean>(name) {
+            @Override
+            public BooleanArgument build() {
+                return new BooleanArgument(this);
+            }
+        };
     }
 
     @Override

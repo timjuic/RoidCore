@@ -11,7 +11,12 @@ public class TimeArgument extends CommandArgument<Duration> {
     }
 
     public static CommandArgumentBuilder<Duration> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public TimeArgument build() {
+                return new TimeArgument(this);
+            }
+        };
     }
 
     @Override

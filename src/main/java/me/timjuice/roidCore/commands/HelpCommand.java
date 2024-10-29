@@ -15,10 +15,15 @@ public class HelpCommand extends SubCommand {
     private final RoidCore roidPlugin;
 
     public HelpCommand(RoidCore roidPlugin, CommandManager baseCommand) {
-//        super("help", new String[]{}, "Help command", "", "", 0, false, false, "General");
         super(new SubCommand.Builder("help")
                 .setDescription("Help command")
-                .addArgument(StringArgument.builder("group"))
+                .addArgument(
+                    StringArgument.builder("group")
+                        .setRequired(false)
+                        .setValidOptions(() -> roidPlugin.getCommandManager().getUsedCommandGroups())
+                        .build()
+                )
+            .setGroup("help")
         );
         this.roidPlugin = roidPlugin;
         this.baseCommand = baseCommand;

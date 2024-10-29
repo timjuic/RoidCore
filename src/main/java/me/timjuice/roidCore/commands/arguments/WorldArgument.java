@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,7 +14,12 @@ public class WorldArgument extends CommandArgument<World> {
     }
 
     public static CommandArgumentBuilder<World> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public WorldArgument build() {
+                return new WorldArgument(this);
+            }
+        };
     }
 
     @Override

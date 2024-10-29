@@ -15,7 +15,12 @@ public class PlayerArgument extends CommandArgument<Player> {
     }
 
     public static CommandArgumentBuilder<Player> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public PlayerArgument build() {
+                return new PlayerArgument(this);
+            }
+        };
     }
 
     @Override

@@ -8,7 +8,12 @@ public class StringArgument extends CommandArgument<String> {
     }
 
     public static CommandArgumentBuilder<String> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public StringArgument build() {
+                return new StringArgument(this);
+            }
+        };
     }
 
     @Override

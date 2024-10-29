@@ -17,7 +17,12 @@ public class CombinedPlayerArgument extends CommandArgument<RoidPlayer> {
     }
 
     public static CommandArgumentBuilder<RoidPlayer> builder(String name) {
-        return new CommandArgumentBuilder<>(name);
+        return new CommandArgumentBuilder<>(name) {
+            @Override
+            public CombinedPlayerArgument build() {
+                return new CombinedPlayerArgument(this);
+            }
+        };
     }
 
     @Override
