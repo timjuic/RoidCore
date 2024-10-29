@@ -18,7 +18,7 @@ public class HelpCommand extends SubCommand {
 //        super("help", new String[]{}, "Help command", "", "", 0, false, false, "General");
         super(new SubCommand.Builder("help")
                 .setDescription("Help command")
-                .addArgument(new StringArgument("group", false))
+                .addArgument(StringArgument.builder("group"))
         );
         this.roidPlugin = roidPlugin;
         this.baseCommand = baseCommand;

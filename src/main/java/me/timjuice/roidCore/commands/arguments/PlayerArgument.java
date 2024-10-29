@@ -10,16 +10,16 @@ import java.util.stream.Collectors;
 import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
 public class PlayerArgument extends CommandArgument<Player> {
-    public PlayerArgument(String name, boolean required) {
-        super(name, required);
+    public PlayerArgument(CommandArgumentBuilder<Player> builder) {
+        super(builder);
     }
 
-    public PlayerArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<Player> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         return Bukkit.getPlayerExact(input) != null; // Check if player is online
     }
 

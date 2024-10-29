@@ -5,23 +5,22 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
 public class OfflinePlayerArgument extends CommandArgument<OfflinePlayer> {
-    public OfflinePlayerArgument(String name, boolean required) {
-        super(name, required);
+    public OfflinePlayerArgument(CommandArgumentBuilder<OfflinePlayer> builder) {
+        super(builder);
     }
 
-    public OfflinePlayerArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<OfflinePlayer> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(input);
         if (offlinePlayer == null || !offlinePlayer.hasPlayedBefore()) return false;
         return true;

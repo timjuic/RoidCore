@@ -7,17 +7,12 @@ import java.util.List;
 import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
 public class PositiveIntegerArgument extends IntegerArgument {
-
-    public PositiveIntegerArgument(String name, boolean required) {
-        super(name, required);
-    }
-
-    public PositiveIntegerArgument(String name) {
-        super(name);
+    public PositiveIntegerArgument(CommandArgumentBuilder<Integer> builder) {
+        super(builder);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         try {
             int value = Integer.parseInt(input);
             return value > 0;

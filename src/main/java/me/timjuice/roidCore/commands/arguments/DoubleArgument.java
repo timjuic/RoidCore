@@ -1,25 +1,20 @@
 package me.timjuice.roidCore.commands.arguments;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
 public class DoubleArgument extends CommandArgument<Double> {
-    public DoubleArgument(String name, boolean required) {
-        super(name, required);
+    public DoubleArgument(CommandArgumentBuilder<Double> builder) {
+        super(builder);
     }
 
-    public DoubleArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<Double> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         try {
             Double.parseDouble(input);
             return true;

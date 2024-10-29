@@ -12,16 +12,16 @@ import java.util.List;
 import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
 public class CombinedPlayerArgument extends CommandArgument<RoidPlayer> {
-    public CombinedPlayerArgument(String name, boolean required) {
-        super(name, required);
+    public CombinedPlayerArgument(CommandArgumentBuilder<RoidPlayer> builder) {
+        super(builder);
     }
 
-    public CombinedPlayerArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<RoidPlayer> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(input);
         return offlinePlayer != null && offlinePlayer.hasPlayedBefore();
     }

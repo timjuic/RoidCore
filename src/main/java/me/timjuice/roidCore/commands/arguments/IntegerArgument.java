@@ -4,19 +4,17 @@ import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
-import static me.timjuice.roidCore.utils.FormatUtil.tc;
-
 public class IntegerArgument extends CommandArgument<Integer> {
-    public IntegerArgument(String name, boolean required) {
-        super(name, required);
+    public IntegerArgument(CommandArgumentBuilder<Integer> builder) {
+        super(builder);
     }
 
-    public IntegerArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<Integer> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         try {
             Integer.parseInt(input);
             return true;

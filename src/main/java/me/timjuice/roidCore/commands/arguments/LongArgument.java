@@ -7,16 +7,16 @@ import java.util.List;
 import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
 public class LongArgument extends CommandArgument<Long> {
-    public LongArgument(String name, boolean required) {
-        super(name, required);
+    public LongArgument(CommandArgumentBuilder<Long> builder) {
+        super(builder);
     }
 
-    public LongArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<Long> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         try {
             Long.parseLong(input);
             return true;

@@ -5,16 +5,16 @@ import org.bukkit.command.CommandSender;
 import java.util.List;
 
 public class ShortArgument extends CommandArgument<Short> {
-    public ShortArgument(String name, boolean required) {
-        super(name, required);
+    public ShortArgument(CommandArgumentBuilder<Short> builder) {
+        super(builder);
     }
 
-    public ShortArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<Short> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         try {
             Short.parseShort(input);
             return true;

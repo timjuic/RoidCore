@@ -8,16 +8,16 @@ import java.util.stream.Collectors;
 
 public class BooleanArgument extends CommandArgument<Boolean> {
 
-    public BooleanArgument(String name, boolean required) {
-        super(name, required);
+    public BooleanArgument(CommandArgumentBuilder<Boolean> builder) {
+        super(builder);
     }
 
-    public BooleanArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<Boolean> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         // Check if input matches true/false or yes/no (case insensitive)
         return input.equalsIgnoreCase("true") || input.equalsIgnoreCase("false") ||
                 input.equalsIgnoreCase("yes") || input.equalsIgnoreCase("no");

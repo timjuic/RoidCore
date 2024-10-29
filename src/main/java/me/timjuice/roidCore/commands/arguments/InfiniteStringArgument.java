@@ -7,16 +7,16 @@ import java.util.List;
 import static me.timjuice.roidCore.utils.FormatUtil.tc;
 
 public class InfiniteStringArgument extends CommandArgument<String> {
-    public InfiniteStringArgument(String name, boolean required) {
-        super(name, required);
+    public InfiniteStringArgument(CommandArgumentBuilder<String> builder) {
+        super(builder);
     }
 
-    public InfiniteStringArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<String> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         return !input.trim().isEmpty(); // Accepts any non-empty string
     }
 

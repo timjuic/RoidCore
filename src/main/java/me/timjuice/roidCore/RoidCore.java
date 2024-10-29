@@ -13,15 +13,15 @@ public class RoidCore extends JavaPlugin {
     @Getter
     private CoreMessageConfig messageConfig;
 
-    private CommandManager testCommandManager;
+    protected CommandManager commandManager;
 
     @Override
     public void onEnable() {
         instance = this;
         messageConfig = new CoreMessageConfig(this);
 
-        testCommandManager = new CommandManager(this, "roidcore");
-        testCommandManager.addCommand(new TestCommand());
+        commandManager = new CommandManager(this, "roidcore");
+        commandManager.addCommand(new TestCommand());
     }
 
     @Override

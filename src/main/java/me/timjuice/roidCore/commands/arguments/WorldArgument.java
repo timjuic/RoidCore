@@ -8,17 +8,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class WorldArgument extends CommandArgument<World> {
-
-    public WorldArgument(String name, boolean required) {
-        super(name, required);
+    public WorldArgument(CommandArgumentBuilder<World> builder) {
+        super(builder);
     }
 
-    public WorldArgument(String name) {
-        super(name);
+    public static CommandArgumentBuilder<World> builder(String name) {
+        return new CommandArgumentBuilder<>(name);
     }
 
     @Override
-    public boolean isValid(String input) {
+    public boolean isTypeValid(String input) {
         return Bukkit.getWorld(input) != null;
     }
 
