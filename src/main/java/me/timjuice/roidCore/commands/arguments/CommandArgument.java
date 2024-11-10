@@ -26,6 +26,7 @@ public abstract class CommandArgument<T> {
     protected final Supplier<List<String>> suggestedOptionsSupplier;
     private final T defaultValue;
     private final boolean hasDefaultValue;
+    private final String permission;
 
     /**
      * Protected constructor for creating a new CommandArgument.
@@ -40,6 +41,7 @@ public abstract class CommandArgument<T> {
         this.suggestedOptionsSupplier = builder.suggestedOptionsSupplier;
         this.defaultValue = builder.defaultValue;
         this.hasDefaultValue = builder.hasDefaultValue;
+        this.permission = builder.permission;
 
         // Validate default value if one is set
         if (hasDefaultValue) {
@@ -54,6 +56,10 @@ public abstract class CommandArgument<T> {
                 );
             }
         }
+    }
+
+    public boolean requiresPermission() {
+        return permission != null && !permission.isEmpty();
     }
 
     /**
@@ -87,6 +93,7 @@ public abstract class CommandArgument<T> {
         private Supplier<List<String>> suggestedOptionsSupplier = Collections::emptyList;
         private T defaultValue;
         private boolean hasDefaultValue = false;
+        private String permission = "";
 
         /**
          * Creates a new builder for a CommandArgument with the specified name.
@@ -138,6 +145,11 @@ public abstract class CommandArgument<T> {
             }
             this.defaultValue = defaultValue;
             this.hasDefaultValue = true;
+            return this;
+        }
+
+        public CommandArgumentBuilder<T> setPermission(String permission) {
+            this.permission = permission;
             return this;
         }
 

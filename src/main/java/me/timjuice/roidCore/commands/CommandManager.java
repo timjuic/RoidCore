@@ -124,8 +124,8 @@ public class CommandManager implements CommandExecutor, TabCompleter {
     public void clearCommands() {
         if (bukkitCommandMap == null) return;
 
-        // Unregister base command
-        bukkitCommandMap.getCommand(baseCmdName).unregister(bukkitCommandMap);
+//        // Unregister base command
+//        bukkitCommandMap.getCommand(baseCmdName).unregister(bukkitCommandMap);
 
         // Unregister all subcommands
         for (SubCommand subCommand : subCommands.values()) {
@@ -377,6 +377,12 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         // Second pass: process regular arguments and handle default values
         for (int i = 0; i < subcommandArgs.size(); i++) {
             CommandArgument<?> commandArg = subcommandArgs.get(i);
+
+            // Check argument permission if provided
+            if (commandArg.requiresPermission() && !sender.hasPermission(commandArg.getPermission()) && !sender.isOp()) {
+                sender.sendMessage(roidPlugin.getMessageConfig().getNoPermissionMessage());
+                return null;
+            }
 
             // Check if we have an argument provided
             if (i < nonFlagArgs.length) {
