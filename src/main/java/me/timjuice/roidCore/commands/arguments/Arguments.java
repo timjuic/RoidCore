@@ -52,18 +52,17 @@ public class Arguments {
      * @param <T> The type of the argument.
      * @return The argument value or null if it doesn't exist.
      */
+    @SuppressWarnings("unchecked")
     public <T> T get(String key) {
         try {
-            Optional<T> value = this.getOptional(key);
-            if (value.isEmpty()) {
-                ConsoleLogger.error(plugin, "The argument '" + key + "' does not exist.");
-                return null; // Return null if argument doesn't exist
+            if (!arguments.containsKey(key)) {
+                return null;
             }
-            return value.get();
+            return (T) arguments.get(key);
         } catch (Exception e) {
             ConsoleLogger.error(plugin, "Error retrieving argument '" + key + "': " + e.getMessage());
+            return null;
         }
-        return null; // Return null in case of an error
     }
 
     /**
@@ -73,6 +72,7 @@ public class Arguments {
      * @param <T> The type of the argument.
      * @return An Optional containing the argument value if it exists, or an empty Optional.
      */
+    @SuppressWarnings("unchecked")
     public <T> Optional<T> getOptional(String key) {
         return Optional.ofNullable((T) arguments.get(key));
     }

@@ -225,7 +225,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         List<String> commandGroup = new ArrayList<>();
         for (SubCommand subcommand : subCommands.values()) {
             if (commandGroup.contains(subcommand.getGroup())) continue;
-            commandGroup.add(subcommand.getName());
+            commandGroup.add(subcommand.getGroup());
         }
         return commandGroup;
     }
@@ -334,12 +334,13 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         // Convert list back to array for further processing
         String[] nonFlagArgs = nonFlagArgsList.toArray(new String[0]);
 
-        // Second pass: process regular arguments
-        for (int i = 0; i < nonFlagArgs.length; i++) {
-            String arg = nonFlagArgs[i];
+        // Second pass: process regular arguments and handle default values
+        for (int i = 0; i < subcommandArgs.size(); i++) {
+            CommandArgument<?> commandArg = subcommandArgs.get(i);
 
-            if (i < subcommandArgs.size()) {
-                CommandArgument<?> commandArg = subcommandArgs.get(i);
+            // Check if we have an argument provided
+            if (i < nonFlagArgs.length) {
+                String arg = nonFlagArgs[i];
 
                 if (!commandArg.isValid(arg)) {
                     sender.sendMessage(commandArg.getErrorMessage(arg));
@@ -354,6 +355,16 @@ public class CommandManager implements CommandExecutor, TabCompleter {
                 } else {
                     Object convertedValue = commandArg.convert(arg);
                     arguments.put(commandArg.getName(), convertedValue);
+                }
+            } else {
+                // No argument provided - check for default value
+                if (!commandArg.isRequired()) {
+                    Optional<?> defaultValue = commandArg.getDefaultValue();
+                    defaultValue.ifPresent(o -> arguments.put(commandArg.getName(), o));
+                } else {
+                    // Required argument missing
+                    sender.sendMessage(ChatColor.RED + "Missing required argument: " + commandArg.getName());
+                    return null;
                 }
             }
         }

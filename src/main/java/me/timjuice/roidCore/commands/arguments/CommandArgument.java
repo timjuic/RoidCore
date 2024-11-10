@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,8 @@ public abstract class CommandArgument<T> {
     private final boolean required;
     protected final Supplier<List<String>> validOptionsSupplier;
     protected final Supplier<List<String>> suggestedOptionsSupplier;
+    private final T defaultValue;
+    private final boolean hasDefaultValue;
 
     /**
      * Protected constructor for creating a new CommandArgument.
@@ -35,6 +38,22 @@ public abstract class CommandArgument<T> {
         this.required = builder.required;
         this.validOptionsSupplier = builder.validOptionsSupplier;
         this.suggestedOptionsSupplier = builder.suggestedOptionsSupplier;
+        this.defaultValue = builder.defaultValue;
+        this.hasDefaultValue = builder.hasDefaultValue;
+
+        // Validate default value if one is set
+        if (hasDefaultValue) {
+            if (required) {
+                throw new IllegalArgumentException("Required arguments cannot have default values");
+            }
+
+            String defaultValueStr = String.valueOf(defaultValue);
+            if (!isTypeValid(defaultValueStr)) {
+                throw new IllegalArgumentException(
+                    String.format("Invalid default value '%s' for argument '%s'", defaultValueStr, name)
+                );
+            }
+        }
     }
 
     /**
@@ -66,6 +85,8 @@ public abstract class CommandArgument<T> {
         private boolean required = true;
         private Supplier<List<String>> validOptionsSupplier = Collections::emptyList;
         private Supplier<List<String>> suggestedOptionsSupplier = Collections::emptyList;
+        private T defaultValue;
+        private boolean hasDefaultValue = false;
 
         /**
          * Creates a new builder for a CommandArgument with the specified name.
@@ -108,6 +129,15 @@ public abstract class CommandArgument<T> {
          */
         public CommandArgumentBuilder<T> setSuggestedOptions(Supplier<List<String>> optionsSupplier) {
             this.suggestedOptionsSupplier = optionsSupplier;
+            return this;
+        }
+
+        public CommandArgumentBuilder<T> setDefaultValue(T defaultValue) {
+            if (required) {
+                throw new IllegalArgumentException("Cannot set default value for required argument");
+            }
+            this.defaultValue = defaultValue;
+            this.hasDefaultValue = true;
             return this;
         }
 
@@ -231,5 +261,14 @@ public abstract class CommandArgument<T> {
      */
     public String getUsage() {
         return required ? "<" + name + ">" : "[" + name + "]";
+    }
+
+    /**
+     * Gets the default value if one is set
+     *
+     * @return Optional containing the default value, or empty if no default is set
+     */
+    public Optional<T> getDefaultValue() {
+        return hasDefaultValue ? Optional.of(defaultValue) : Optional.empty();
     }
 }
