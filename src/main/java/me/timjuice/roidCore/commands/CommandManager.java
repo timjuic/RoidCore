@@ -29,6 +29,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
     private final Map<UUID, Map<String, Long>> cooldowns = new HashMap<>();
     private final RoidCore roidPlugin;
     private final String baseDescription;
+    private CommandMap bukkitCommandMap;
 
     public CommandManager(RoidCore roidPlugin, String baseCmdName, String basePermission, String baseDescription, String[] aliases) {
         this.roidPlugin = roidPlugin;
@@ -57,48 +58,83 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         this(roidPlugin, baseCmdName, "", "Base " + baseCmdName + " command", null);
     }
 
-    public void registerCommand() {
+    private void initializeCommandMap() {
         try {
-            Field f = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-            f.setAccessible(true);
-            CommandMap commandMap = (CommandMap) f.get(Bukkit.getServer());
-            Command baseCommand = new Command(baseCmdName, baseDescription, "/" + baseCmdName, List.of(aliases)) {
-                @Override
-                public boolean execute(CommandSender sender, String label, String[] args) {
-                    return onCommand(sender, this, label, args);  // Delegate to CommandManager's onCommand
-                }
-
-                @Override
-                public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
-                    return onTabComplete(sender, this, alias, args);  // Delegate to CommandManager's onTabComplete
-                }
-            };
-
-            // Register the command
-            commandMap.register(roidPlugin.getName(), baseCommand);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+            Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            bukkitCommandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
+            ConsoleLogger.error(roidPlugin, "Failed to initialize command map");
         }
     }
 
-    public void clearCommands() {
-        try {
-            Field f = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-            f.setAccessible(true);
-            CommandMap commandMap = (CommandMap) f.get(Bukkit.getServer());
+    public void registerCommand() {
+        if (bukkitCommandMap == null) {
+            ConsoleLogger.error(roidPlugin, "Cannot register commands - command map is null");
+            return;
+        }
 
-            commandMap.getCommand(baseCmdName).unregister(commandMap);
-            for (SubCommand subCommand : subCommands.values()) {
-                PluginCommand command = roidPlugin.getCommand(subCommand.getName());
+        Command baseCommand = new Command(baseCmdName, baseDescription, "/" + baseCmdName, List.of(aliases)) {
+            @Override
+            public boolean execute(CommandSender sender, String label, String[] args) {
+                return onCommand(sender, this, label, args);
+            }
+
+            @Override
+            public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
+                return onTabComplete(sender, this, alias, args);
+            }
+        };
+
+        bukkitCommandMap.register(roidPlugin.getName(), baseCommand);
+    }
+
+    private void registerDirectCommand(SubCommand subCommand) {
+        if (bukkitCommandMap == null) {
+            ConsoleLogger.error(roidPlugin, "Cannot register direct command - command map is null");
+            return;
+        }
+
+        // Create a new command instance for direct registration
+        Command command = new Command(
+            subCommand.getName(),
+            subCommand.getDescription(),
+            "/" + subCommand.getName(),
+            new ArrayList<>(subCommand.getAliases())
+        ) {
+            @Override
+            public boolean execute(CommandSender sender, String label, String[] args) {
+                return onCommand(sender, this, label, args);
+            }
+
+            @Override
+            public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
+                return onTabComplete(sender, this, alias, args);
+            }
+        };
+
+        // Register the command with Bukkit's command map
+        bukkitCommandMap.register(roidPlugin.getName(), command);
+        ConsoleLogger.info(roidPlugin, "Registered direct command: " + subCommand.getName());
+    }
+
+    public void clearCommands() {
+        if (bukkitCommandMap == null) return;
+
+        // Unregister base command
+        bukkitCommandMap.getCommand(baseCmdName).unregister(bukkitCommandMap);
+
+        // Unregister all subcommands
+        for (SubCommand subCommand : subCommands.values()) {
+            if (subCommand.isRegisterDirectly()) {
+                Command command = bukkitCommandMap.getCommand(subCommand.getName());
                 if (command != null) {
-                    command.setExecutor(null);
-                    command.unregister(commandMap);
+                    command.unregister(bukkitCommandMap);
                 }
             }
-            subCommands.clear();
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
         }
+        subCommands.clear();
     }
 
     @Override
@@ -188,8 +224,10 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         if (!commandValid) return;
 
         this.subCommands.put(subCommand.getClass().getName(), subCommand);
+
+        // If the command should be registered directly, register it with Bukkit
         if (subCommand.isRegisterDirectly()) {
-            roidPlugin.getCommand(subCommand.getName()).setExecutor(this);
+            registerDirectCommand(subCommand);
         }
     }
 
