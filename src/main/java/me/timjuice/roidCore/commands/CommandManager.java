@@ -38,7 +38,9 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         this.baseDescription = baseDescription;
         this.aliases = (aliases != null) ? aliases : new String[0]; // Default to empty array if null
 
-        this.registerCommand();
+        initializeCommandMap();
+
+        registerCommand();
 
         this.commandHelp = new HelpCommand(roidPlugin, this);
         this.addCommand(this.commandHelp);
