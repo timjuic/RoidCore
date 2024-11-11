@@ -50,7 +50,7 @@ public class HelpCommand extends SubCommand {
         if (isGroupRequested) {
             requestedGroup = args.get("group");
             StringBuilder helpMsgBuilder = new StringBuilder();
-            helpMsgBuilder.append(RoidCore.getInstance().getMessageConfig().getHelpCategoryHeader()
+            helpMsgBuilder.append(roidPlugin.getMessageConfig().getHelpCategoryHeader()
                     .replace("{CATEGORY}", requestedGroup))
                     .append("\n");
 
@@ -68,7 +68,7 @@ public class HelpCommand extends SubCommand {
 
         // Build help message
         StringBuilder helpMsgBuilder = new StringBuilder();
-        helpMsgBuilder.append(RoidCore.getInstance().getMessageConfig().getHelpMessageHeader()
+        helpMsgBuilder.append(roidPlugin.getMessageConfig().getHelpMessageHeader()
                 .replace("{PLUGIN_NAME}", roidPlugin.getName()))
                 .append("\n");
 
