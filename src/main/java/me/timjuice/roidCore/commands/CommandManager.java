@@ -17,6 +17,8 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static me.timjuice.roidCore.utils.FormatUtil.tc;
+
 public class CommandManager implements CommandExecutor, TabCompleter {
     private final LinkedHashMap<String, SubCommand> subCommands = new LinkedHashMap<>();
     private final HelpCommand commandHelp;
@@ -378,15 +380,21 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         for (int i = 0; i < subcommandArgs.size(); i++) {
             CommandArgument<?> commandArg = subcommandArgs.get(i);
 
-            // Check argument permission if provided
-            if (commandArg.requiresPermission() && !sender.hasPermission(commandArg.getPermission()) && !sender.isOp()) {
-                sender.sendMessage(roidPlugin.getMessageConfig().getNoPermissionMessage());
-                return null;
-            }
+//            // Check argument permission if provided
+//            if (commandArg.requiresPermission() && !sender.hasPermission(commandArg.getPermission()) && !sender.isOp()) {
+//                sender.sendMessage(roidPlugin.getMessageConfig().getNoPermissionMessage());
+//                return null;
+//            }
 
             // Check if we have an argument provided
             if (i < nonFlagArgs.length) {
                 String arg = nonFlagArgs[i];
+
+                // Check if player has permission to use this argument
+                if (commandArg.requiresPermission() && !sender.hasPermission(commandArg.getPermission()) && !sender.isOp()) {
+                    sender.sendMessage(tc(String.format("&cYou don't have permission to use argument '%s' in this command", commandArg.getName())));
+                    return null;
+              }
 
                 if (!commandArg.isValid(arg)) {
                     sender.sendMessage(commandArg.getErrorMessage(arg));
