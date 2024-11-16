@@ -100,6 +100,33 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             return;
         }
 
+        // First, try to unregister any existing command with the same name
+        Command existingCommand = bukkitCommandMap.getCommand(subCommand.getName());
+        if (existingCommand != null) {
+            try {
+                // Get the knownCommands field from SimpleCommandMap
+                Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+                knownCommandsField.setAccessible(true);
+
+                @SuppressWarnings("unchecked")
+                Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(bukkitCommandMap);
+
+                // Remove the existing command and its aliases
+                knownCommands.remove(existingCommand.getName());
+                if (existingCommand.getAliases() != null) {
+                    for (String alias : existingCommand.getAliases()) {
+                        knownCommands.remove(alias);
+                    }
+                }
+
+                existingCommand.unregister(bukkitCommandMap);
+                ConsoleLogger.info(roidPlugin, "Unregistered existing command: " + subCommand.getName());
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                ConsoleLogger.error(roidPlugin, "Failed to unregister existing command: " + e.getMessage());
+                return;
+            }
+        }
+
         // Create a new command instance for direct registration
         Command command = new Command(
             subCommand.getName(),
@@ -119,8 +146,9 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         };
 
         // Register the command with Bukkit's command map
-        bukkitCommandMap.register(roidPlugin.getName(), command);
-        ConsoleLogger.info(roidPlugin, "Registered direct command: " + subCommand.getName());
+        bukkitCommandMap.register(roidPlugin.getName().toLowerCase(), command);
+        ConsoleLogger.info(roidPlugin, "Registered direct command: " + subCommand.getName() +
+            (existingCommand != null ? " (overridden)" : ""));
     }
 
     public void clearCommands() {
