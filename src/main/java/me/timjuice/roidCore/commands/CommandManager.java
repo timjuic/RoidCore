@@ -56,6 +56,8 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             roidPlugin.getCommand(baseCmdName).setExecutor(this);
             roidPlugin.getCommand(baseCmdName).setTabCompleter(this);
         }
+
+        registerPreprocessListener();
     }
 
     public CommandManager(RoidCore roidPlugin, String baseCmdName, String[] aliases) {
