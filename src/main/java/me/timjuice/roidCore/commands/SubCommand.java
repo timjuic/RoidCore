@@ -24,9 +24,10 @@ public abstract class SubCommand {
     private final String group;
     private final List<CommandArgument<?>> arguments;
     private final Map<String, Boolean> flags;
+    private final Set<String> preprocessAliases;
 
     // Main constructor with cooldown
-    protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, boolean playerOnly, boolean registerDirectly, int cooldown, String group, List<CommandArgument<?>> arguments, Map<String, Boolean> flags) {
+    protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, boolean playerOnly, boolean registerDirectly, int cooldown, String group, List<CommandArgument<?>> arguments, Map<String, Boolean> flags, Set<String> preprocessAliases) {
         this.name = name;
         this.aliases = aliases;
         this.description = description;
@@ -38,6 +39,7 @@ public abstract class SubCommand {
         this.group = group;
         this.arguments = arguments;
         this.flags = flags;
+        this.preprocessAliases = preprocessAliases;
     }
 
     protected SubCommand(Builder builder) {
@@ -52,21 +54,22 @@ public abstract class SubCommand {
         this.group = builder.group;
         this.arguments = builder.arguments;
         this.flags = builder.flags;
+        this.preprocessAliases = builder.preprocessAliases;
     }
 
     // Overloaded constructor without cooldown and group (defaults to "General")
     protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, boolean playerOnly, boolean registerDirectly) {
-        this(name, aliases, description, permission, syntax, playerOnly, registerDirectly, 0, DefaultCommandGroup.NONE.getName(), List.of(), new HashMap<>()); // Default to empty map for flags
+        this(name, aliases, description, permission, syntax, playerOnly, registerDirectly, 0, DefaultCommandGroup.NONE.getName(), List.of(), new HashMap<>(), new HashSet<>()); // Default to empty map for flags
     }
 
     // Overloaded constructor without cooldown, registerDirectly, and group (defaults to "General")
     protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, boolean playerOnly) {
-        this(name, aliases, description, permission, syntax, playerOnly, false, 0, DefaultCommandGroup.NONE.getName(), List.of(), new HashMap<>()); // Default to empty map for flags
+        this(name, aliases, description, permission, syntax, playerOnly, false, 0, DefaultCommandGroup.NONE.getName(), List.of(), new HashMap<>(), new HashSet<>()); // Default to empty map for flags
     }
 
     // Overloaded constructor with cooldown but without registerDirectly and group (defaults to "General")
     protected SubCommand(String name, String[] aliases, String description, String permission, String syntax, boolean playerOnly, int cooldown) {
-        this(name, aliases, description, permission, syntax, playerOnly, false, cooldown, DefaultCommandGroup.NONE.getName(), List.of(), new HashMap<>()); // Default to empty map for flags
+        this(name, aliases, description, permission, syntax, playerOnly, false, cooldown, DefaultCommandGroup.NONE.getName(), List.of(), new HashMap<>(), new HashSet<>()); // Default to empty map for flags
     }
 
     public Set<String> getAliases() {
@@ -95,6 +98,10 @@ public abstract class SubCommand {
             }
         }
         return count; // Count of required arguments
+    }
+
+    public Set<String> getPreprocessAliases() {
+        return Collections.unmodifiableSet(preprocessAliases);
     }
 
     // Get maximum arguments based on the total arguments defined
@@ -137,6 +144,7 @@ public abstract class SubCommand {
         private String group = DefaultCommandGroup.NONE.getName();
         private List<CommandArgument<?>> arguments = new ArrayList<>();
         private Map<String, Boolean> flags = new HashMap<>();
+        private Set<String> preprocessAliases = new HashSet<>();
 
         public Builder(String name) {
             this.name = name;
@@ -189,6 +197,11 @@ public abstract class SubCommand {
 
         public Builder addFlag(String flag) {
             this.flags.put(flag, false); // Initialize the flag with false
+            return this;
+        }
+
+        public Builder setPreprocessAliases(String... aliases) {
+            this.preprocessAliases = new HashSet<>(Arrays.asList(aliases));
             return this;
         }
     }

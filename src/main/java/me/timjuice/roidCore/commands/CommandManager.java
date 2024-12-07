@@ -11,6 +11,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
@@ -32,6 +35,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
     private final RoidCore roidPlugin;
     private final String baseDescription;
     private CommandMap bukkitCommandMap;
+    private final Map<String, SubCommand> preprocessAliasMap = new HashMap<>();
 
     public CommandManager(RoidCore roidPlugin, String baseCmdName, String basePermission, String baseDescription, String[] aliases) {
         this.roidPlugin = roidPlugin;
@@ -60,6 +64,81 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
     public CommandManager(RoidCore roidPlugin, String baseCmdName) {
         this(roidPlugin, baseCmdName, "", "Base " + baseCmdName + " command", null);
+    }
+
+    private void registerPreprocessListener() {
+        Bukkit.getPluginManager().registerEvent(
+            PlayerCommandPreprocessEvent.class,
+            new Listener() {},
+            EventPriority.NORMAL,
+            (listener, event) -> {
+                if (!(event instanceof PlayerCommandPreprocessEvent e)) return;
+                handlePreprocessEvent(e);
+            },
+            roidPlugin
+        );
+    }
+
+    private void handlePreprocessEvent(PlayerCommandPreprocessEvent event) {
+        String message = event.getMessage().substring(1); // Remove the '/'
+        String[] parts = message.split(" ");
+        if (parts.length == 0) return;
+
+        // Combine first two parts for potential alias (e.g., "f sideclaim")
+        String potentialAlias = parts.length > 1 ? parts[0] + " " + parts[1] : parts[0];
+        SubCommand subCommand = preprocessAliasMap.get(potentialAlias.toLowerCase());
+
+        if (subCommand == null) return;
+
+        // Check permissions
+        if (subCommand.requiresPermission() &&
+            !event.getPlayer().hasPermission(subCommand.getPermission()) &&
+            !event.getPlayer().isOp()) {
+            event.getPlayer().sendMessage(roidPlugin.getMessageConfig().getNoPermissionMessage());
+            event.setCancelled(true);
+            return;
+        }
+
+        // Handle player-only commands
+        if (subCommand.isPlayerOnly() && !(event.getPlayer() instanceof Player)) {
+            event.getPlayer().sendMessage(roidPlugin.getMessageConfig().getOnlyPlayersCommandMessage());
+            event.setCancelled(true);
+            return;
+        }
+
+        // Extract arguments (skip the command parts)
+        String[] args = Arrays.copyOfRange(parts, 2, parts.length);
+
+        // Validate arguments count
+        if (args.length < subCommand.getMinArgs()) {
+            event.getPlayer().sendMessage(ChatColor.RED + "Not enough args! Use: " +
+                ChatColor.DARK_RED + String.format("/%s %s", parts[0] + " " + parts[1], subCommand.getUsage()));
+            event.setCancelled(true);
+            return;
+        }
+
+        // Validate and convert arguments
+        Arguments arguments = validateAndConvertArguments(subCommand, args, event.getPlayer());
+        if (arguments == null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Handle cooldown
+        if (subCommand.getCooldown() > 0) {
+            if (isOnCooldown(event.getPlayer(), subCommand)) {
+                String timeLeft = getCooldownTimeLeft(event.getPlayer(), subCommand);
+                event.getPlayer().sendMessage(ChatColor.RED + "You must wait " +
+                    ChatColor.WHITE + timeLeft + ChatColor.RED + " seconds before using this command again.");
+                event.setCancelled(true);
+                return;
+            }
+            updateCooldown(event.getPlayer(), subCommand);
+        }
+
+        // Execute command and cancel event
+        subCommand.execute(event.getPlayer(), arguments);
+        event.setCancelled(true);
     }
 
     private void initializeCommandMap() {
@@ -153,6 +232,8 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
     public void clearCommands() {
         if (bukkitCommandMap == null) return;
+
+        preprocessAliasMap.clear();
 
 //        // Unregister base command
 //        bukkitCommandMap.getCommand(baseCmdName).unregister(bukkitCommandMap);
@@ -256,6 +337,18 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         if (!commandValid) return;
 
         this.subCommands.put(subCommand.getClass().getName(), subCommand);
+
+        // Register preprocess aliases
+        for (String alias : subCommand.getPreprocessAliases()) {
+            String lowercaseAlias = alias.toLowerCase();
+            if (preprocessAliasMap.containsKey(lowercaseAlias)) {
+                ConsoleLogger.warning(roidPlugin, String.format(
+                    "Duplicate preprocess alias '%s' for command '%s'. Skipping.",
+                    alias, subCommand.getName()));
+                continue;
+            }
+            preprocessAliasMap.put(lowercaseAlias, subCommand);
+        }
 
         // If the command should be registered directly, register it with Bukkit
         if (subCommand.isRegisterDirectly()) {
