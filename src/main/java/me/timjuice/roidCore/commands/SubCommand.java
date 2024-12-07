@@ -2,8 +2,11 @@ package me.timjuice.roidCore.commands;
 
 import com.google.common.collect.Sets;
 import lombok.Getter;
+import me.timjuice.roidCore.RoidCore;
 import me.timjuice.roidCore.commands.arguments.Arguments;
 import me.timjuice.roidCore.commands.arguments.CommandArgument;
+import me.timjuice.roidCore.commands.arguments.InfiniteStringArgument;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.*;
@@ -188,5 +191,69 @@ public abstract class SubCommand {
             this.flags.put(flag, false); // Initialize the flag with false
             return this;
         }
+    }
+
+    public void executeCommand(CommandSender sender, String[] args) {
+        // Validate argument count
+        if (args.length < getMinArgs()) {
+            sender.sendMessage(ChatColor.RED + "Not enough args! Use: " +
+                ChatColor.DARK_RED + getUsage());
+            return;
+        }
+
+        // Create and populate Arguments object
+        Arguments arguments = new Arguments(RoidCore.getInstance());
+
+        StringBuilder infiniteStringBuilder = new StringBuilder();
+        List<String> nonFlagArgsList = new ArrayList<>();
+
+        // First pass: process flags and collect non-flag arguments
+        for (String arg : args) {
+            if (arg.startsWith("-") && this.flags.containsKey(arg)) {
+                arguments.setFlag(arg);
+            } else {
+                nonFlagArgsList.add(arg);
+            }
+        }
+
+        String[] nonFlagArgs = nonFlagArgsList.toArray(new String[0]);
+
+        // Second pass: process regular arguments
+        for (int i = 0; i < this.arguments.size(); i++) {
+            CommandArgument<?> commandArg = this.arguments.get(i);
+
+            // Check if we have an argument provided
+            if (i < nonFlagArgs.length) {
+                String arg = nonFlagArgs[i];
+
+                if (!commandArg.isValid(arg)) {
+                    sender.sendMessage(commandArg.getErrorMessage(arg));
+                    return;
+                }
+
+                if (commandArg instanceof InfiniteStringArgument) {
+                    String[] remainingArgs = Arrays.copyOfRange(nonFlagArgs, i, nonFlagArgs.length);
+                    infiniteStringBuilder.append(String.join(" ", remainingArgs));
+                    Object convertedValue = commandArg.convert(infiniteStringBuilder.toString());
+                    arguments.put(commandArg.getName(), convertedValue);
+                } else {
+                    Object convertedValue = commandArg.convert(arg);
+                    arguments.put(commandArg.getName(), convertedValue);
+                }
+            } else {
+                // No argument provided - check for default value
+                if (!commandArg.isRequired()) {
+                    Optional<?> defaultValue = commandArg.getDefaultValue();
+                    defaultValue.ifPresent(o -> arguments.put(commandArg.getName(), o));
+                } else {
+                    // Required argument missing
+                    sender.sendMessage(ChatColor.RED + "Missing required argument: " + commandArg.getName());
+                    return;
+                }
+            }
+        }
+
+        // Execute the command with processed arguments
+        execute(sender, arguments);
     }
 }
